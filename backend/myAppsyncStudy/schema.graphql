@@ -44,13 +44,16 @@ type Mutation {
 }
 
 type Query {
-	meInfo(consumer_key: String, consumer_secret: String): User!
+	meInfo(name: String, location: String): User!
 	getUserInfo(handle: String!, consumer_key: String, consumer_secret: String): User!
+	getTweet(tweet:String):Tweet!
 
 	# search functionality is available in elasticsearch integration
 	searchAllTweetsByKeyword(keyword: String!): TweetConnection
 }
 
+
+directive @aws_subscribe(mutations: [String!]!) on FIELD_DEFINITION
 type Subscription {
 	addTweet: Tweet
 		@aws_subscribe(mutations: ["createTweet"])

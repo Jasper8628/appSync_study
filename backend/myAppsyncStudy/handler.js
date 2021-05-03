@@ -246,9 +246,10 @@
 
 exports.graphqlHandler = (event, context, callback) => {
   console.log('Received event {}', JSON.stringify(event, 3));
+  const { name, location } = event.arguments
 
-  const consumerKey = event.arguments.consumer_key;
-  const consumerSecret = event.arguments.consumer_secret;
+  // const consumerKey = event.arguments.consumer_key;
+  // const consumerSecret = event.arguments.consumer_secret;
 
   console.log('Got an Invoke Request.');
   switch (event.field) {
@@ -271,8 +272,8 @@ exports.graphqlHandler = (event, context, callback) => {
         followers_count: 2,
         friends_count: 0,
         handle: 'jd',
-        name: 'jasper',
-        location: 'sydney'
+        name: name,
+        location: location
       })
 
       break;

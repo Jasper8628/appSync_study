@@ -62,7 +62,7 @@ custom:
   appSync:
     # name:  # defaults to api
     authenticationType: API_KEY
-    serviceRole: AllAccess
+    serviceRole: PublicAppSyncServiceRole
     # userPoolConfig:
     #   awsRegion: # defaults to provider region
     #   defaultAction: # ALLOW
@@ -74,6 +74,11 @@ custom:
         field: getUserInfo
         request: "getUserInfo-request-mapping-template.vtl"
         response: "getUserInfo-response-mapping-template.vtl"
+      - dataSource: Tweets
+        type: Query
+        field: getTweet
+        request: "getTweet-request-mapping-template.vtl"
+        response: "getTweet-response-mapping-template.vtl"
       - dataSource: Lambda_MeInfo
         type: Query
         field: meInfo
@@ -126,13 +131,13 @@ custom:
         description: 'Users table'
         config:
           tableName: { Ref: UserTable }
-          serviceRoleArn: { Fn::GetAtt: [AppSyncDynamoDBServiceRole, Arn] }
+          # serviceRoleArn: { Fn::GetAtt: [AppSyncDynamoDBServiceRole, Arn] }
       - type: AMAZON_DYNAMODB
         name: Tweets
         description: 'Tweets table'
         config:
           tableName: { Ref: TweetsTable }
-          serviceRoleArn: { Fn::GetAtt: [AppSyncDynamoDBServiceRole, Arn] }
+          # serviceRoleArn: { Fn::GetAtt: [AppSyncDynamoDBServiceRole, Arn] }
       # - type: AMAZON_ELASTICSEARCH
       #   name: ElasticSearch
       #   description: 'ElasticSearch'
@@ -144,7 +149,7 @@ custom:
         description: 'Lambda DataSource'
         config: # Either of functionName or lambdaFunctionArn must tbe provided. When both are present, lambdaFunctionArn is used.
           functionName: graphql
-          lambdaFunctionArn: { Fn::GetAtt: [GraphqlLambdaFunction, Arn] } 
+          # lambdaFunctionArn: { Fn::GetAtt: [GraphqlLambdaFunction, Arn] } 
           # serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
 
 resources:
@@ -169,11 +174,11 @@ resources:
       Properties:
         KeySchema:
           -
-            AttributeName: tweet_id
+            AttributeName: tweet
             KeyType: HASH
         AttributeDefinitions:
           -
-            AttributeName: tweet_id
+            AttributeName: tweet
             AttributeType: S
           -
             AttributeName: handle
@@ -249,10 +254,10 @@ resources:
                     - "dynamodb:UpdateItem"
                   Resource:
                     # TODO replace with { "Ref" : "AWS::AccountNumber" }
-                    - "arn:aws:dynamodb:us-east-1:${self:custom.accountId}:table/Users"
-                    - "arn:aws:dynamodb:us-east-1:${self:custom.accountId}:table/Users/*"
-                    - "arn:aws:dynamodb:us-east-1:${self:custom.accountId}:table/Tweets"
-                    - "arn:aws:dynamodb:us-east-1:${self:custom.accountId}:table/Tweets/*"
+                    - "arn:aws:dynamodb:${self:provider.region}:${self:custom.accountId}:table/Users"
+                    - "arn:aws:dynamodb:${self:provider.region}:${self:custom.accountId}:table/Users/*"
+                    - "arn:aws:dynamodb:${self:provider.region}:${self:custom.accountId}:table/Tweets"
+                    - "arn:aws:dynamodb:${self:provider.region}:${self:custom.accountId}:table/Tweets/*"
     AppSyncLambdaServiceRole:
       Type: "AWS::IAM::Role"
       Properties:

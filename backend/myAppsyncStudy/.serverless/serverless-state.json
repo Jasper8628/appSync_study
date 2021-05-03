@@ -168,7 +168,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/myappsyncstudy/dev/1620044858563-2021-05-03T12:27:38.563Z/myappsyncstudy.zip"
+                "S3Key": "serverless/myappsyncstudy/dev/1620077991943-2021-05-03T21:39:51.943Z/myappsyncstudy.zip"
               },
               "FunctionName": "myappsyncstudy-dev-graphql",
               "Handler": "handler.graphqlHandler",
@@ -191,14 +191,14 @@
               "GraphqlLogGroup"
             ]
           },
-          "GraphqlLambdaVersion0o4BZb1cv8B3reYyJiTKgrsfYlDtoiZVTu4rmtD84Jg": {
+          "GraphqlLambdaVersionYa3wq8EH4mQlTENWqVUOgx1ohluac1b1Vqiv1DEBU8": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "GraphqlLambdaFunction"
               },
-              "CodeSha256": "QgQwcZpenlziAywN1ZAbJKta6XfNa3EAyly3UPZc5xA="
+              "CodeSha256": "FjVl34rJIoZ8NNUFCzAx4dHjEORbT+yiT//3hUYmrPw="
             }
           },
           "UserTable": {
@@ -228,13 +228,13 @@
             "Properties": {
               "KeySchema": [
                 {
-                  "AttributeName": "tweet_id",
+                  "AttributeName": "tweet",
                   "KeyType": "HASH"
                 }
               ],
               "AttributeDefinitions": [
                 {
-                  "AttributeName": "tweet_id",
+                  "AttributeName": "tweet",
                   "AttributeType": "S"
                 },
                 {
@@ -302,7 +302,7 @@
           "AppSyncDynamoDBServiceRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
-              "RoleName": "Dynamo-AllAccess",
+              "RoleName": "Dynamo-PublicAppSyncServiceRole",
               "AssumeRolePolicyDocument": {
                 "Version": "2012-10-17",
                 "Statement": [
@@ -321,7 +321,7 @@
               },
               "Policies": [
                 {
-                  "PolicyName": "Dynamo-AllAccess-Policy",
+                  "PolicyName": "Dynamo-PublicAppSyncServiceRole-Policy",
                   "PolicyDocument": {
                     "Version": "2012-10-17",
                     "Statement": [
@@ -337,10 +337,10 @@
                           "dynamodb:UpdateItem"
                         ],
                         "Resource": [
-                          "arn:aws:dynamodb:us-east-1:abc:table/Users",
-                          "arn:aws:dynamodb:us-east-1:abc:table/Users/*",
-                          "arn:aws:dynamodb:us-east-1:abc:table/Tweets",
-                          "arn:aws:dynamodb:us-east-1:abc:table/Tweets/*"
+                          "arn:aws:dynamodb:ap-southeast-2:abc:table/Users",
+                          "arn:aws:dynamodb:ap-southeast-2:abc:table/Users/*",
+                          "arn:aws:dynamodb:ap-southeast-2:abc:table/Tweets",
+                          "arn:aws:dynamodb:ap-southeast-2:abc:table/Tweets/*"
                         ]
                       }
                     ]
@@ -352,7 +352,7 @@
           "AppSyncLambdaServiceRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
-              "RoleName": "Lambda-AllAccess",
+              "RoleName": "Lambda-PublicAppSyncServiceRole",
               "AssumeRolePolicyDocument": {
                 "Version": "2012-10-17",
                 "Statement": [
@@ -371,7 +371,7 @@
               },
               "Policies": [
                 {
-                  "PolicyName": "Lambda-AllAccess-Policy",
+                  "PolicyName": "Lambda-PublicAppSyncServiceRole-Policy",
                   "PolicyDocument": {
                     "Version": "2012-10-17",
                     "Statement": [
@@ -394,7 +394,7 @@
           "AppSyncESServiceRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
-              "RoleName": "ElasticSearch-AllAccess",
+              "RoleName": "ElasticSearch-PublicAppSyncServiceRole",
               "AssumeRolePolicyDocument": {
                 "Version": "2012-10-17",
                 "Statement": [
@@ -413,7 +413,7 @@
               },
               "Policies": [
                 {
-                  "PolicyName": "ElasticSearch-AllAccess-Policy",
+                  "PolicyName": "ElasticSearch-PublicAppSyncServiceRole-Policy",
                   "PolicyDocument": {
                     "Version": "2012-10-17",
                     "Statement": [
@@ -451,19 +451,185 @@
                 ]
               },
               "Description": "Auto-generated api key",
-              "Expires": 1651579200
+              "Expires": 1651611600
             }
           },
           "GraphQlSchema": {
             "Type": "AWS::AppSync::GraphQLSchema",
             "Properties": {
-              "Definition": "type Mutation {\n  \n      createTweet(tweet: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String, created_at: String!): Tweet!\n  \n    deleteTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    reTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    updateTweet(tweet_id: String!, tweet: String!): Tweet!\n  \n    updateUserInfo(location: String!, description: String!, name: String!, followers_count: Int!, friends_count: Int!, favourites_count: Int!, followers: [String!]!): User!\n}\n\ntype Query {\n  meInfo(consumer_key: String, consumer_secret: String): User!\n  getUserInfo(handle: String!, consumer_key: String, consumer_secret: String): User!\n  \n    searchAllTweetsByKeyword(keyword: String!): TweetConnection\n}\n\ntype Subscription {\n  addTweet: Tweet @aws_subscribe(mutations: [\"createTweet\"])\n}\n\ntype Tweet {\n  tweet_id: String!\n  tweet: String!\n  retweeted: Boolean\n  retweet_count: Int\n  favorited: Boolean\n  created_at: String!\n}\n\ntype TweetConnection {\n  items: [Tweet!]!\n  nextToken: String\n}\n\ntype User {\n  name: String!\n  handle: String!\n  location: String!\n  description: String!\n  followers_count: Int!\n  friends_count: Int!\n  favourites_count: Int!\n  followers: [String!]!\n  topTweet: Tweet\n  tweets(limit: Int!, nextToken: String): TweetConnection\n  \n    searchTweetsByKeyword(keyword: String!): TweetConnection\n}\n\nschema {\n  query: Query\n  mutation: Mutation\n  subscription: Subscription\n}\n",
+              "Definition": "type Mutation {\n  \n      createTweet(tweet: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String, created_at: String!): Tweet!\n  \n    deleteTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    reTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    updateTweet(tweet_id: String!, tweet: String!): Tweet!\n  \n    updateUserInfo(location: String!, description: String!, name: String!, followers_count: Int!, friends_count: Int!, favourites_count: Int!, followers: [String!]!): User!\n}\n\ntype Query {\n  meInfo(name: String, location: String): User!\n  getUserInfo(handle: String!, consumer_key: String, consumer_secret: String): User!\n  getTweet(tweet: String): Tweet!\n  \n    searchAllTweetsByKeyword(keyword: String!): TweetConnection\n}\n\ndirective @aws_subscribe(mutations: [String!]!) on FIELD_DEFINITION\n\ntype Subscription {\n  addTweet: Tweet @aws_subscribe(mutations: [\"createTweet\"])\n}\n\ntype Tweet {\n  tweet_id: String!\n  tweet: String!\n  retweeted: Boolean\n  retweet_count: Int\n  favorited: Boolean\n  created_at: String!\n}\n\ntype TweetConnection {\n  items: [Tweet!]!\n  nextToken: String\n}\n\ntype User {\n  name: String!\n  handle: String!\n  location: String!\n  description: String!\n  followers_count: Int!\n  friends_count: Int!\n  favourites_count: Int!\n  followers: [String!]!\n  topTweet: Tweet\n  tweets(limit: Int!, nextToken: String): TweetConnection\n  \n    searchTweetsByKeyword(keyword: String!): TweetConnection\n}\n\nschema {\n  query: Query\n  mutation: Mutation\n  subscription: Subscription\n}\n",
               "ApiId": {
                 "Fn::GetAtt": [
                   "GraphQlApi",
                   "ApiId"
                 ]
               }
+            }
+          },
+          "GraphQlDsUsersRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "appsync.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": "GraphQlDsUsersPolicy",
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Action": [
+                          "dynamodb:DeleteItem",
+                          "dynamodb:GetItem",
+                          "dynamodb:PutItem",
+                          "dynamodb:Query",
+                          "dynamodb:Scan",
+                          "dynamodb:UpdateItem",
+                          "dynamodb:BatchGetItem",
+                          "dynamodb:BatchWriteItem",
+                          "dynamodb:ConditionCheckItem"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": [
+                          {
+                            "Fn::Join": [
+                              ":",
+                              [
+                                "arn",
+                                "aws",
+                                "dynamodb",
+                                "ap-southeast-2",
+                                {
+                                  "Ref": "AWS::AccountId"
+                                },
+                                {
+                                  "Fn::Join": [
+                                    "/",
+                                    [
+                                      "table",
+                                      {
+                                        "Ref": "UserTable"
+                                      }
+                                    ]
+                                  ]
+                                }
+                              ]
+                            ]
+                          },
+                          {
+                            "Fn::Join": [
+                              "/",
+                              [
+                                {
+                                  "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsUsersRole\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][0][\"Resource\"][0]"
+                                },
+                                "*"
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "GraphQlDsTweetsRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "appsync.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": "GraphQlDsTweetsPolicy",
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Action": [
+                          "dynamodb:DeleteItem",
+                          "dynamodb:GetItem",
+                          "dynamodb:PutItem",
+                          "dynamodb:Query",
+                          "dynamodb:Scan",
+                          "dynamodb:UpdateItem",
+                          "dynamodb:BatchGetItem",
+                          "dynamodb:BatchWriteItem",
+                          "dynamodb:ConditionCheckItem"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": [
+                          {
+                            "Fn::Join": [
+                              ":",
+                              [
+                                "arn",
+                                "aws",
+                                "dynamodb",
+                                "ap-southeast-2",
+                                {
+                                  "Ref": "AWS::AccountId"
+                                },
+                                {
+                                  "Fn::Join": [
+                                    "/",
+                                    [
+                                      "table",
+                                      {
+                                        "Ref": "TweetsTable"
+                                      }
+                                    ]
+                                  ]
+                                }
+                              ]
+                            ]
+                          },
+                          {
+                            "Fn::Join": [
+                              "/",
+                              [
+                                {
+                                  "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsTweetsRole\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][0][\"Resource\"][0]"
+                                },
+                                "*"
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
             }
           },
           "GraphQlDsLambdaMeInfoRole": {
@@ -536,14 +702,14 @@
               "Type": "AMAZON_DYNAMODB",
               "ServiceRoleArn": {
                 "Fn::GetAtt": [
-                  "AppSyncDynamoDBServiceRole",
+                  "GraphQlDsUsersRole",
                   "Arn"
                 ]
               },
               "DynamoDBConfig": {
                 "AwsRegion": "ap-southeast-2",
                 "TableName": {
-                  "Ref": "UserTable"
+                  "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsUsersRole\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][0][\"Resource\"][0][\"Fn::Join\"][1][5][\"Fn::Join\"][1][1]"
                 },
                 "UseCallerCredentials": false,
                 "Versioned": false
@@ -564,14 +730,14 @@
               "Type": "AMAZON_DYNAMODB",
               "ServiceRoleArn": {
                 "Fn::GetAtt": [
-                  "AppSyncDynamoDBServiceRole",
+                  "GraphQlDsTweetsRole",
                   "Arn"
                 ]
               },
               "DynamoDBConfig": {
                 "AwsRegion": "ap-southeast-2",
                 "TableName": {
-                  "Ref": "TweetsTable"
+                  "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsTweetsRole\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][0][\"Resource\"][0][\"Fn::Join\"][1][5][\"Fn::Join\"][1][1]"
                 },
                 "UseCallerCredentials": false,
                 "Versioned": false
@@ -598,7 +764,10 @@
               },
               "LambdaConfig": {
                 "LambdaFunctionArn": {
-                  "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsLambdaMeInfoRole\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][0][\"Resource\"][0]"
+                  "Fn::GetAtt": [
+                    "GraphqlLambdaFunction",
+                    "Arn"
+                  ]
                 }
               }
             }
@@ -621,6 +790,29 @@
               "DataSourceName": {
                 "Fn::GetAtt": [
                   "GraphQlDsUsers",
+                  "Name"
+                ]
+              }
+            }
+          },
+          "GraphQlResolverQuerygetTweet": {
+            "Type": "AWS::AppSync::Resolver",
+            "DependsOn": "GraphQlSchema",
+            "Properties": {
+              "ApiId": {
+                "Fn::GetAtt": [
+                  "GraphQlApi",
+                  "ApiId"
+                ]
+              },
+              "TypeName": "Query",
+              "FieldName": "getTweet",
+              "RequestMappingTemplate": "{\r\n    \"version\" : \"2017-02-28\",\r\n    \"operation\" : \"Query\",\r\n    \"query\" : {\r\n        \"expression\": \"tweet = :tweet\",\r\n        \"expressionValues\" : {\r\n            \":tweet\" : {\r\n                \"S\" : \"${context.arguments.tweet}\"\r\n            }\r\n        }\r\n    }\r\n}",
+              "ResponseMappingTemplate": "$util.toJson($context.result.items[0])",
+              "Kind": "UNIT",
+              "DataSourceName": {
+                "Fn::GetAtt": [
+                  "GraphQlDsTweets",
                   "Name"
                 ]
               }
@@ -820,7 +1012,7 @@
           "GraphqlLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GraphqlLambdaVersion0o4BZb1cv8B3reYyJiTKgrsfYlDtoiZVTu4rmtD84Jg"
+              "Ref": "GraphqlLambdaVersionYa3wq8EH4mQlTENWqVUOgx1ohluac1b1Vqiv1DEBU8"
             }
           },
           "GraphQlApiKeyDefault": {
@@ -932,7 +1124,7 @@
       "accountId": "abc",
       "appSync": {
         "authenticationType": "API_KEY",
-        "serviceRole": "AllAccess",
+        "serviceRole": "PublicAppSyncServiceRole",
         "mappingTemplates": [
           {
             "dataSource": "Users",
@@ -940,6 +1132,13 @@
             "field": "getUserInfo",
             "request": "getUserInfo-request-mapping-template.vtl",
             "response": "getUserInfo-response-mapping-template.vtl"
+          },
+          {
+            "dataSource": "Tweets",
+            "type": "Query",
+            "field": "getTweet",
+            "request": "getTweet-request-mapping-template.vtl",
+            "response": "getTweet-response-mapping-template.vtl"
           },
           {
             "dataSource": "Lambda_MeInfo",
@@ -1005,10 +1204,7 @@
             "description": "Users table",
             "config": {
               "tableName": {
-                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsUsers\"][\"Properties\"][\"DynamoDBConfig\"][\"TableName\"]"
-              },
-              "serviceRoleArn": {
-                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsUsers\"][\"Properties\"][\"ServiceRoleArn\"]"
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsUsersRole\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][0][\"Resource\"][0][\"Fn::Join\"][1][5][\"Fn::Join\"][1][1]"
               }
             }
           },
@@ -1018,10 +1214,7 @@
             "description": "Tweets table",
             "config": {
               "tableName": {
-                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsTweets\"][\"Properties\"][\"DynamoDBConfig\"][\"TableName\"]"
-              },
-              "serviceRoleArn": {
-                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsTweets\"][\"Properties\"][\"ServiceRoleArn\"]"
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsTweetsRole\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][0][\"Resource\"][0][\"Fn::Join\"][1][5][\"Fn::Join\"][1][1]"
               }
             }
           },
@@ -1030,10 +1223,7 @@
             "name": "Lambda_MeInfo",
             "description": "Lambda DataSource",
             "config": {
-              "functionName": "graphql",
-              "lambdaFunctionArn": {
-                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsLambdaMeInfoRole\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][0][\"Resource\"][0]"
-              }
+              "functionName": "graphql"
             }
           }
         ]
@@ -1056,7 +1246,7 @@
         "timeout": 6,
         "runtime": "nodejs14.x",
         "vpc": {},
-        "versionLogicalId": "GraphqlLambdaVersion0o4BZb1cv8B3reYyJiTKgrsfYlDtoiZVTu4rmtD84Jg"
+        "versionLogicalId": "GraphqlLambdaVersionYa3wq8EH4mQlTENWqVUOgx1ohluac1b1Vqiv1DEBU8"
       }
     },
     "resources": {
@@ -1088,13 +1278,13 @@
           "Properties": {
             "KeySchema": [
               {
-                "AttributeName": "tweet_id",
+                "AttributeName": "tweet",
                 "KeyType": "HASH"
               }
             ],
             "AttributeDefinitions": [
               {
-                "AttributeName": "tweet_id",
+                "AttributeName": "tweet",
                 "AttributeType": "S"
               },
               {
@@ -1162,7 +1352,7 @@
         "AppSyncDynamoDBServiceRole": {
           "Type": "AWS::IAM::Role",
           "Properties": {
-            "RoleName": "Dynamo-AllAccess",
+            "RoleName": "Dynamo-PublicAppSyncServiceRole",
             "AssumeRolePolicyDocument": {
               "Version": "2012-10-17",
               "Statement": [
@@ -1181,7 +1371,7 @@
             },
             "Policies": [
               {
-                "PolicyName": "Dynamo-AllAccess-Policy",
+                "PolicyName": "Dynamo-PublicAppSyncServiceRole-Policy",
                 "PolicyDocument": {
                   "Version": "2012-10-17",
                   "Statement": [
@@ -1197,10 +1387,10 @@
                         "dynamodb:UpdateItem"
                       ],
                       "Resource": [
-                        "arn:aws:dynamodb:us-east-1:abc:table/Users",
-                        "arn:aws:dynamodb:us-east-1:abc:table/Users/*",
-                        "arn:aws:dynamodb:us-east-1:abc:table/Tweets",
-                        "arn:aws:dynamodb:us-east-1:abc:table/Tweets/*"
+                        "arn:aws:dynamodb:ap-southeast-2:abc:table/Users",
+                        "arn:aws:dynamodb:ap-southeast-2:abc:table/Users/*",
+                        "arn:aws:dynamodb:ap-southeast-2:abc:table/Tweets",
+                        "arn:aws:dynamodb:ap-southeast-2:abc:table/Tweets/*"
                       ]
                     }
                   ]
@@ -1212,7 +1402,7 @@
         "AppSyncLambdaServiceRole": {
           "Type": "AWS::IAM::Role",
           "Properties": {
-            "RoleName": "Lambda-AllAccess",
+            "RoleName": "Lambda-PublicAppSyncServiceRole",
             "AssumeRolePolicyDocument": {
               "Version": "2012-10-17",
               "Statement": [
@@ -1231,7 +1421,7 @@
             },
             "Policies": [
               {
-                "PolicyName": "Lambda-AllAccess-Policy",
+                "PolicyName": "Lambda-PublicAppSyncServiceRole-Policy",
                 "PolicyDocument": {
                   "Version": "2012-10-17",
                   "Statement": [
@@ -1254,7 +1444,7 @@
         "AppSyncESServiceRole": {
           "Type": "AWS::IAM::Role",
           "Properties": {
-            "RoleName": "ElasticSearch-AllAccess",
+            "RoleName": "ElasticSearch-PublicAppSyncServiceRole",
             "AssumeRolePolicyDocument": {
               "Version": "2012-10-17",
               "Statement": [
@@ -1273,7 +1463,7 @@
             },
             "Policies": [
               {
-                "PolicyName": "ElasticSearch-AllAccess-Policy",
+                "PolicyName": "ElasticSearch-PublicAppSyncServiceRole-Policy",
                 "PolicyDocument": {
                   "Version": "2012-10-17",
                   "Statement": [
@@ -1332,7 +1522,7 @@
     "isDashboardMonitoringPreconfigured": false
   },
   "package": {
-    "artifactDirectoryName": "serverless/myappsyncstudy/dev/1620044858563-2021-05-03T12:27:38.563Z",
+    "artifactDirectoryName": "serverless/myappsyncstudy/dev/1620077991943-2021-05-03T21:39:51.943Z",
     "artifact": ""
   }
 }
