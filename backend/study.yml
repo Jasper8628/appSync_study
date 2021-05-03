@@ -1,0 +1,127 @@
+service: backend
+
+# Pin service to only deploy with a specific Serverless version
+frameworkVersion: '2'
+
+# AWS config parameters
+provider:
+  name: aws
+  runtime: nodejs14.x
+
+  stackName: backend
+  apiName: backend
+
+  stage: dev
+  region: ap-southeast-2
+
+  apiGateway:
+    metrics: true
+
+  environment:
+    REGION: ap-southeast-2
+    # COGNITO_USER_POOL_ID: ap-southeast-2_pNT4oXppf
+    # COGNITO_USER_POOL_CLIENT_ID: 37t4cmhhsufk0e44hqdivog2cf
+
+    DYNAMO_USER_PROFILE_TABLE: Dev-UserProfile
+    # DYNAMO_VIDEO_TABLE: video-pipeline
+
+    # VIDEO_UPLOAD_TEMPORARY_BUCKET: dev-video-upload-temp-bucket
+    # VIDEO_THUMBNAIL_BUCKET: dev-video-thumbnail-bucket
+    # VIDEO_PRODUCT_LINK_IMAGE_BUCKET: dev-video-product-link-image-bucket
+    # VIDEO_PIPELINE_SOURCE_BUCKET: video-pipeline-source-6revag747q0x
+    # VIDEO_PIPELINE_DESTINATION_BUCKET: video-pipeline-destination-ofjnsl6xbzb
+    # PROFILE_IMAGES_BUCKET: stomble-profile-images
+
+    # DEFAULT_PROFILE_IMAGES_AMOUNT: 5
+
+  # Permissions
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - cognito-idp:AdminInitiateAuth
+        - dynamodb:*
+        - S3:*
+        - cognito-idp:AdminCreateUser
+      Resource: '*'
+
+  # Specify Stomble AWS credentials from ~/.aws/credentials
+  profile: myAppsyncSutdy
+
+# Add the serverless-webpack plugin
+plugins:
+  - serverless-webpack
+  - serverless-offline
+  - serverless-appsync-plugin
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+  appSync: 
+    name: '${self:service}-${self:provider.stage}-api'
+    authenticationType: AWS_IAM
+  mappingTemplates: 
+    - dataSource: '${self:service}-${self:provider.stage}-putItem'
+      type: Query
+      field: putItem
+      request: "requests/putItem.vtl"
+      response: "responses/putItem.vtl"
+  mappingTemplatesLocation: "mapping-templates"
+  serviceRole: AppSyncServiceRole
+  dataSources:
+    - type: AMAZON_LAMBDA
+      name:
+      description: 
+      config:
+        
+
+functions:
+  putItem:
+    name: '${self:service}-${self:provider.stage}-putItem'
+    description: create item in db
+    handler: src/functions/putItem.lambdaFunction
+    # appsync functions shouldn't have trigger events?
+
+  # authorizer:
+  #   name: '${self:service}-${self:provider.stage}-authorizer'
+  #   description: Middleware to handle authentication.
+  #   handler: src/functions/auth/authorizer.lambdaFunction
+
+  # editUser:
+  #   name: '${self:service}-${self:provider.stage}-edit-user'
+  #   description: update user profile change in dynamoDB
+  #   handler: src/functions/users/edit.editUser
+  #   events:
+  #     - http:
+  #         method: put
+  #         path: profile
+  #         authorizer: authorizer
+
+resources:
+  Resources:
+    UserProfileDataDynamoDB:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Dev-UserProfile
+        AttributeDefinitions:
+          - AttributeName: ID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ID
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    # StombleTemporaryVideoUploadBucket:
+    #   Type: AWS::S3::Bucket
+    #   Properties:
+    #     BucketName: dev-video-upload-temp-bucket
+    #     CorsConfiguration:
+    #       CorsRules:
+    #         - AllowedOrigins:
+    #             - '*'
+    #           AllowedHeaders:
+    #             - '*'
+    #           AllowedMethods:
+    #             - PUT
+    #             - DELETE
+    #           MaxAge: 3000

@@ -1,0 +1,25 @@
+
+
+service: myappsyncstudy
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  lambdaHashingVersion: 20201221
+
+
+
+functions:
+  hello:
+    handler: handler.hello
+    
+# appSync:
+#   name: $(self:service)-$(self.provider.stage)-api
+#   authenticationType: AWS_IAM
+#   mappingTemplates: 
+#     - dataSource: Notes
+#       type: Mutation
+#       field: createNote
+#       request: "request/create-item-request-mapping-template.vtl"
+#       response: "response/generic-response-mapping-template.vtl"
