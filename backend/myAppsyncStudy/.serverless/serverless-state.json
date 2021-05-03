@@ -5,12 +5,20 @@
       "name": "myappsyncstudy"
     },
     "provider": {
+      "stage": "dev",
+      "variableSyntax": "\\${([^{}]+?)}",
       "name": "aws",
       "runtime": "nodejs14.x",
-      "lambdaHashingVersion": "20201221",
-      "stage": "dev",
-      "variableSyntax": "\\${([^{}:]+?(?:\\(|:)(?:[^:{}][^{}]*?)?)}",
-      "region": "us-east-1",
+      "lambdaHashingVersion": 20201221,
+      "stackName": "appsyncstudy",
+      "apiName": "appsyncstudy",
+      "region": "ap-southeast-2",
+      "apiGateway": {
+        "metrics": true
+      },
+      "environment": {
+        "REGION": "ap-southeast-2"
+      },
       "versionFunctions": true,
       "compiledCloudFormationTemplate": {
         "AWSTemplateFormatVersion": "2010-09-09",
@@ -58,21 +66,6 @@
                             "/*"
                           ]
                         ]
-                      },
-                      {
-                        "Fn::Join": [
-                          "",
-                          [
-                            "arn:",
-                            {
-                              "Ref": "AWS::Partition"
-                            },
-                            ":s3:::",
-                            {
-                              "Ref": "ServerlessDeploymentBucket"
-                            }
-                          ]
-                        ]
                       }
                     ],
                     "Condition": {
@@ -85,10 +78,10 @@
               }
             }
           },
-          "HelloLogGroup": {
+          "GraphqlLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/myappsyncstudy-dev-hello"
+              "LogGroupName": "/aws/lambda/myappsyncstudy-dev-graphql"
             }
           },
           "IamRoleLambdaExecution": {
@@ -168,39 +161,653 @@
               }
             }
           },
-          "HelloLambdaFunction": {
+          "GraphqlLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/myappsyncstudy/dev/1620035407279-2021-05-03T09:50:07.279Z/myappsyncstudy.zip"
+                "S3Key": "serverless/myappsyncstudy/dev/1620044858563-2021-05-03T12:27:38.563Z/myappsyncstudy.zip"
               },
-              "Handler": "handler.hello",
-              "Runtime": "nodejs14.x",
-              "FunctionName": "myappsyncstudy-dev-hello",
+              "FunctionName": "myappsyncstudy-dev-graphql",
+              "Handler": "handler.graphqlHandler",
               "MemorySize": 1024,
-              "Timeout": 6,
               "Role": {
                 "Fn::GetAtt": [
                   "IamRoleLambdaExecution",
                   "Arn"
                 ]
+              },
+              "Runtime": "nodejs14.x",
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "REGION": "ap-southeast-2"
+                }
               }
             },
             "DependsOn": [
-              "HelloLogGroup"
+              "GraphqlLogGroup"
             ]
           },
-          "HelloLambdaVersiontdOv38NqF734CPJ2BAdKX6aMp2S7nxbfMlBPoFOu48": {
+          "GraphqlLambdaVersion0o4BZb1cv8B3reYyJiTKgrsfYlDtoiZVTu4rmtD84Jg": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "HelloLambdaFunction"
+                "Ref": "GraphqlLambdaFunction"
               },
-              "CodeSha256": "cI1pFpW0ctANT3OQF1JBAhKBl6TWXlBLXajgl2McgWw="
+              "CodeSha256": "QgQwcZpenlziAywN1ZAbJKta6XfNa3EAyly3UPZc5xA="
+            }
+          },
+          "UserTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "KeySchema": [
+                {
+                  "AttributeName": "handle",
+                  "KeyType": "HASH"
+                }
+              ],
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "handle",
+                  "AttributeType": "S"
+                }
+              ],
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": 1,
+                "WriteCapacityUnits": 1
+              },
+              "TableName": "Users"
+            }
+          },
+          "TweetsTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "KeySchema": [
+                {
+                  "AttributeName": "tweet_id",
+                  "KeyType": "HASH"
+                }
+              ],
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "tweet_id",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "handle",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "retweet_count",
+                  "AttributeType": "N"
+                },
+                {
+                  "AttributeName": "created_at",
+                  "AttributeType": "S"
+                }
+              ],
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": 1,
+                "WriteCapacityUnits": 1
+              },
+              "TableName": "Tweets",
+              "GlobalSecondaryIndexes": [
+                {
+                  "IndexName": "top-index",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "handle",
+                      "KeyType": "HASH"
+                    },
+                    {
+                      "AttributeName": "retweet_count",
+                      "KeyType": "RANGE"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  },
+                  "ProvisionedThroughput": {
+                    "ReadCapacityUnits": 1,
+                    "WriteCapacityUnits": 1
+                  }
+                },
+                {
+                  "IndexName": "tweet-index",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "handle",
+                      "KeyType": "HASH"
+                    },
+                    {
+                      "AttributeName": "created_at",
+                      "KeyType": "RANGE"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  },
+                  "ProvisionedThroughput": {
+                    "ReadCapacityUnits": 1,
+                    "WriteCapacityUnits": 1
+                  }
+                }
+              ]
+            }
+          },
+          "AppSyncDynamoDBServiceRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "RoleName": "Dynamo-AllAccess",
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "appsync.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": "Dynamo-AllAccess-Policy",
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "dynamodb:Query",
+                          "dynamodb:BatchWriteItem",
+                          "dynamodb:GetItem",
+                          "dynamodb:DeleteItem",
+                          "dynamodb:PutItem",
+                          "dynamodb:Scan",
+                          "dynamodb:UpdateItem"
+                        ],
+                        "Resource": [
+                          "arn:aws:dynamodb:us-east-1:abc:table/Users",
+                          "arn:aws:dynamodb:us-east-1:abc:table/Users/*",
+                          "arn:aws:dynamodb:us-east-1:abc:table/Tweets",
+                          "arn:aws:dynamodb:us-east-1:abc:table/Tweets/*"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "AppSyncLambdaServiceRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "RoleName": "Lambda-AllAccess",
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "appsync.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": "Lambda-AllAccess-Policy",
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "lambda:invokeFunction"
+                        ],
+                        "Resource": [
+                          "arn:aws:lambda:us-east-1:abc:function:appsync-example-dev-graphql",
+                          "arn:aws:lambda:us-east-1:abc:function:appsync-example-dev-graphql:*"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "AppSyncESServiceRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "RoleName": "ElasticSearch-AllAccess",
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "appsync.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": "ElasticSearch-AllAccess-Policy",
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "es:*"
+                        ],
+                        "Resource": [
+                          "arn:aws:es:us-east-1:abc:domain/appsync/*"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "GraphQlApi": {
+            "Type": "AWS::AppSync::GraphQLApi",
+            "Properties": {
+              "Name": "api",
+              "AuthenticationType": "API_KEY",
+              "AdditionalAuthenticationProviders": [],
+              "XrayEnabled": false
+            }
+          },
+          "GraphQlApiKeyDefault": {
+            "Type": "AWS::AppSync::ApiKey",
+            "Properties": {
+              "ApiId": {
+                "Fn::GetAtt": [
+                  "GraphQlApi",
+                  "ApiId"
+                ]
+              },
+              "Description": "Auto-generated api key",
+              "Expires": 1651579200
+            }
+          },
+          "GraphQlSchema": {
+            "Type": "AWS::AppSync::GraphQLSchema",
+            "Properties": {
+              "Definition": "type Mutation {\n  \n      createTweet(tweet: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String, created_at: String!): Tweet!\n  \n    deleteTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    reTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    updateTweet(tweet_id: String!, tweet: String!): Tweet!\n  \n    updateUserInfo(location: String!, description: String!, name: String!, followers_count: Int!, friends_count: Int!, favourites_count: Int!, followers: [String!]!): User!\n}\n\ntype Query {\n  meInfo(consumer_key: String, consumer_secret: String): User!\n  getUserInfo(handle: String!, consumer_key: String, consumer_secret: String): User!\n  \n    searchAllTweetsByKeyword(keyword: String!): TweetConnection\n}\n\ntype Subscription {\n  addTweet: Tweet @aws_subscribe(mutations: [\"createTweet\"])\n}\n\ntype Tweet {\n  tweet_id: String!\n  tweet: String!\n  retweeted: Boolean\n  retweet_count: Int\n  favorited: Boolean\n  created_at: String!\n}\n\ntype TweetConnection {\n  items: [Tweet!]!\n  nextToken: String\n}\n\ntype User {\n  name: String!\n  handle: String!\n  location: String!\n  description: String!\n  followers_count: Int!\n  friends_count: Int!\n  favourites_count: Int!\n  followers: [String!]!\n  topTweet: Tweet\n  tweets(limit: Int!, nextToken: String): TweetConnection\n  \n    searchTweetsByKeyword(keyword: String!): TweetConnection\n}\n\nschema {\n  query: Query\n  mutation: Mutation\n  subscription: Subscription\n}\n",
+              "ApiId": {
+                "Fn::GetAtt": [
+                  "GraphQlApi",
+                  "ApiId"
+                ]
+              }
+            }
+          },
+          "GraphQlDsLambdaMeInfoRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "appsync.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": "GraphQlDsLambdaMeInfoPolicy",
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Action": [
+                          "lambda:invokeFunction"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": [
+                          {
+                            "Fn::GetAtt": [
+                              "GraphqlLambdaFunction",
+                              "Arn"
+                            ]
+                          },
+                          {
+                            "Fn::Join": [
+                              ":",
+                              [
+                                {
+                                  "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsLambdaMeInfoRole\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][0][\"Resource\"][0]"
+                                },
+                                "*"
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "GraphQlDsUsers": {
+            "Type": "AWS::AppSync::DataSource",
+            "Properties": {
+              "ApiId": {
+                "Fn::GetAtt": [
+                  "GraphQlApi",
+                  "ApiId"
+                ]
+              },
+              "Name": "Users",
+              "Description": "Users table",
+              "Type": "AMAZON_DYNAMODB",
+              "ServiceRoleArn": {
+                "Fn::GetAtt": [
+                  "AppSyncDynamoDBServiceRole",
+                  "Arn"
+                ]
+              },
+              "DynamoDBConfig": {
+                "AwsRegion": "ap-southeast-2",
+                "TableName": {
+                  "Ref": "UserTable"
+                },
+                "UseCallerCredentials": false,
+                "Versioned": false
+              }
+            }
+          },
+          "GraphQlDsTweets": {
+            "Type": "AWS::AppSync::DataSource",
+            "Properties": {
+              "ApiId": {
+                "Fn::GetAtt": [
+                  "GraphQlApi",
+                  "ApiId"
+                ]
+              },
+              "Name": "Tweets",
+              "Description": "Tweets table",
+              "Type": "AMAZON_DYNAMODB",
+              "ServiceRoleArn": {
+                "Fn::GetAtt": [
+                  "AppSyncDynamoDBServiceRole",
+                  "Arn"
+                ]
+              },
+              "DynamoDBConfig": {
+                "AwsRegion": "ap-southeast-2",
+                "TableName": {
+                  "Ref": "TweetsTable"
+                },
+                "UseCallerCredentials": false,
+                "Versioned": false
+              }
+            }
+          },
+          "GraphQlDsLambdaMeInfo": {
+            "Type": "AWS::AppSync::DataSource",
+            "Properties": {
+              "ApiId": {
+                "Fn::GetAtt": [
+                  "GraphQlApi",
+                  "ApiId"
+                ]
+              },
+              "Name": "Lambda_MeInfo",
+              "Description": "Lambda DataSource",
+              "Type": "AWS_LAMBDA",
+              "ServiceRoleArn": {
+                "Fn::GetAtt": [
+                  "GraphQlDsLambdaMeInfoRole",
+                  "Arn"
+                ]
+              },
+              "LambdaConfig": {
+                "LambdaFunctionArn": {
+                  "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsLambdaMeInfoRole\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][0][\"Resource\"][0]"
+                }
+              }
+            }
+          },
+          "GraphQlResolverQuerygetUserInfo": {
+            "Type": "AWS::AppSync::Resolver",
+            "DependsOn": "GraphQlSchema",
+            "Properties": {
+              "ApiId": {
+                "Fn::GetAtt": [
+                  "GraphQlApi",
+                  "ApiId"
+                ]
+              },
+              "TypeName": "Query",
+              "FieldName": "getUserInfo",
+              "RequestMappingTemplate": "{\n    \"version\" : \"2017-02-28\",\n    \"operation\" : \"Query\",\n    \"query\" : {\n        \"expression\": \"handle = :handle\",\n        \"expressionValues\" : {\n            \":handle\" : {\n                \"S\" : \"${context.arguments.handle}\"\n            }\n        }\n    }\n}",
+              "ResponseMappingTemplate": "$util.toJson($context.result.items[0])",
+              "Kind": "UNIT",
+              "DataSourceName": {
+                "Fn::GetAtt": [
+                  "GraphQlDsUsers",
+                  "Name"
+                ]
+              }
+            }
+          },
+          "GraphQlResolverQuerymeInfo": {
+            "Type": "AWS::AppSync::Resolver",
+            "DependsOn": "GraphQlSchema",
+            "Properties": {
+              "ApiId": {
+                "Fn::GetAtt": [
+                  "GraphQlApi",
+                  "ApiId"
+                ]
+              },
+              "TypeName": "Query",
+              "FieldName": "meInfo",
+              "RequestMappingTemplate": "{\n    \"version\": \"2017-02-28\",\n    \"operation\": \"Invoke\",\n    \"payload\": {\n        \"field\": \"meInfo\",\n        \"arguments\":  $utils.toJson($context.arguments),\n        \"handle\" : $utils.toJson($context.identity.username)\n    }\n}",
+              "ResponseMappingTemplate": "$util.toJson($context.result)",
+              "Kind": "UNIT",
+              "DataSourceName": {
+                "Fn::GetAtt": [
+                  "GraphQlDsLambdaMeInfo",
+                  "Name"
+                ]
+              }
+            }
+          },
+          "GraphQlResolverUsertopTweet": {
+            "Type": "AWS::AppSync::Resolver",
+            "DependsOn": "GraphQlSchema",
+            "Properties": {
+              "ApiId": {
+                "Fn::GetAtt": [
+                  "GraphQlApi",
+                  "ApiId"
+                ]
+              },
+              "TypeName": "User",
+              "FieldName": "topTweet",
+              "RequestMappingTemplate": "{\n    \"version\" : \"2017-02-28\",\n    \"operation\" : \"Query\",\n    \"query\" : {\n        ## Provide a query expression. **\n        \"expression\": \"handle = :handle\",\n        \"expressionValues\" : {\n            \":handle\" : {\n                \"S\" : \"${context.identity.username}\"\n            }\n        }\n    },\n    ## Provide a secondary index name or remove the next line to query the table directly. **\n    \"index\": \"top-index\",\n    ## Add 'limit' and 'nextToken' arguments to this field in your schema to implement pagination. **\n    \"limit\": 1,\n    \"scanIndexForward\": false\n}",
+              "ResponseMappingTemplate": "$util.toJson($context.result.items[0])",
+              "Kind": "UNIT",
+              "DataSourceName": {
+                "Fn::GetAtt": [
+                  "GraphQlDsTweets",
+                  "Name"
+                ]
+              }
+            }
+          },
+          "GraphQlResolverUsertweets": {
+            "Type": "AWS::AppSync::Resolver",
+            "DependsOn": "GraphQlSchema",
+            "Properties": {
+              "ApiId": {
+                "Fn::GetAtt": [
+                  "GraphQlApi",
+                  "ApiId"
+                ]
+              },
+              "TypeName": "User",
+              "FieldName": "tweets",
+              "RequestMappingTemplate": "{\n    \"version\": \"2017-02-28\",\n    \"operation\": \"Query\",\n    \"query\": {\n        \"expression\": \"handle = :handle\",\n        \"expressionValues\": {\n            \":handle\": {\n                \"S\": \"$context.identity.username\"\n            }\n        }\n    },\n    ## Provide a secondary index name or remove the next line to query the table directly. **\n    \"index\": \"tweet-index\",\n    \"limit\": #if($context.arguments.limit) $context.arguments.limit #else 10 #end,\n    \"nextToken\": #if($context.arguments.nextToken) \"$context.arguments.nextToken\" #else null #end,\n    \"scanIndexForward\": false\n}",
+              "ResponseMappingTemplate": "{\n    \"items\": $util.toJson($context.result.items),\n    \"nextToken\": $util.toJson($context.result.nextToken)\n}",
+              "Kind": "UNIT",
+              "DataSourceName": {
+                "Fn::GetAtt": [
+                  "GraphQlDsTweets",
+                  "Name"
+                ]
+              }
+            }
+          },
+          "GraphQlResolverMutationcreateTweet": {
+            "Type": "AWS::AppSync::Resolver",
+            "DependsOn": "GraphQlSchema",
+            "Properties": {
+              "ApiId": {
+                "Fn::GetAtt": [
+                  "GraphQlApi",
+                  "ApiId"
+                ]
+              },
+              "TypeName": "Mutation",
+              "FieldName": "createTweet",
+              "RequestMappingTemplate": "{\n    \"version\" : \"2017-02-28\",\n    \"operation\" : \"PutItem\",\n    \"key\" : {\n        \"handle\" : { \"S\" : \"${context.identity.username}\" },\n        \"tweet_id\" : { \"S\" : \"$util.autoId()\" }\n    },\n    \"attributeValues\" : {\n        \"tweet\" : { \"S\" : \"${context.arguments.tweet}\" },\n        \"retweeted\": { \"BOOL\" : false },\n        \"favorited\": { \"BOOL\" : false },\n        \"retweet_count\": { \"N\" : 0},\n        \"created_at\": {\"S\" : \"${context.arguments.created_at}\" }\n    }\n}",
+              "ResponseMappingTemplate": "$utils.toJson($context.result)",
+              "Kind": "UNIT",
+              "DataSourceName": {
+                "Fn::GetAtt": [
+                  "GraphQlDsTweets",
+                  "Name"
+                ]
+              }
+            }
+          },
+          "GraphQlResolverMutationdeleteTweet": {
+            "Type": "AWS::AppSync::Resolver",
+            "DependsOn": "GraphQlSchema",
+            "Properties": {
+              "ApiId": {
+                "Fn::GetAtt": [
+                  "GraphQlApi",
+                  "ApiId"
+                ]
+              },
+              "TypeName": "Mutation",
+              "FieldName": "deleteTweet",
+              "RequestMappingTemplate": "{\n    \"version\" : \"2017-02-28\",\n    \"operation\" : \"DeleteItem\",\n    \"key\" : {\n        \"tweet_id\" : { \"S\" : \"${context.arguments.tweet_id}\" }\n    }\n}",
+              "ResponseMappingTemplate": "$util.toJson($context.result)",
+              "Kind": "UNIT",
+              "DataSourceName": {
+                "Fn::GetAtt": [
+                  "GraphQlDsTweets",
+                  "Name"
+                ]
+              }
+            }
+          },
+          "GraphQlResolverMutationreTweet": {
+            "Type": "AWS::AppSync::Resolver",
+            "DependsOn": "GraphQlSchema",
+            "Properties": {
+              "ApiId": {
+                "Fn::GetAtt": [
+                  "GraphQlApi",
+                  "ApiId"
+                ]
+              },
+              "TypeName": "Mutation",
+              "FieldName": "reTweet",
+              "RequestMappingTemplate": "{\n    \"version\" : \"2017-02-28\",\n    \"operation\" : \"UpdateItem\",\n    \"key\" : {\n        \"tweet_id\" : { \"S\" : \"${context.arguments.tweet_id}\" }\n    },\n    \"update\" : {\n        \"expression\" : \"ADD retweet_count :inc\",\n        \"expressionValues\": {\n        \t\":inc\" : { \"N\" : 1 }\n        }\n    }\n}",
+              "ResponseMappingTemplate": "$utils.toJson($context.result)",
+              "Kind": "UNIT",
+              "DataSourceName": {
+                "Fn::GetAtt": [
+                  "GraphQlDsTweets",
+                  "Name"
+                ]
+              }
+            }
+          },
+          "GraphQlResolverMutationupdateTweet": {
+            "Type": "AWS::AppSync::Resolver",
+            "DependsOn": "GraphQlSchema",
+            "Properties": {
+              "ApiId": {
+                "Fn::GetAtt": [
+                  "GraphQlApi",
+                  "ApiId"
+                ]
+              },
+              "TypeName": "Mutation",
+              "FieldName": "updateTweet",
+              "RequestMappingTemplate": "{\n    \"version\" : \"2017-02-28\",\n    \"operation\" : \"UpdateItem\",\n    \"key\" : {\n        \"tweet_id\" : { \"S\" : \"${context.arguments.tweet_id}\" }\n    },\n    \"update\" : {\n        \"expression\" : \"SET tweet = :tweet\",\n        \"expressionValues\": {\n        \t\":tweet\" : { \"S\" : \"${context.arguments.tweet}\" }\n        }\n    }\n}",
+              "ResponseMappingTemplate": "$utils.toJson($context.result)",
+              "Kind": "UNIT",
+              "DataSourceName": {
+                "Fn::GetAtt": [
+                  "GraphQlDsTweets",
+                  "Name"
+                ]
+              }
+            }
+          },
+          "GraphQlResolverMutationupdateUserInfo": {
+            "Type": "AWS::AppSync::Resolver",
+            "DependsOn": "GraphQlSchema",
+            "Properties": {
+              "ApiId": {
+                "Fn::GetAtt": [
+                  "GraphQlApi",
+                  "ApiId"
+                ]
+              },
+              "TypeName": "Mutation",
+              "FieldName": "updateUserInfo",
+              "RequestMappingTemplate": "{\n    \"version\" : \"2017-02-28\",\n    \"operation\" : \"UpdateItem\",\n    \"key\" : {\n        \"handle\" : { \"S\" : \"${context.identity.username}\" }\n    },\n    \"update\" : {\n        \"expression\" : \"SET followers = :followers, #name = :name, #location = :location, description = :description, followers_count = :followers_count, friends_count = :friends_count, favourites_count = :favourites_count\",\n        \"expressionNames\": {\n            \"#name\" : \"name\",\n            \"#location\" : \"location\"\n        },\n        \"expressionValues\": {\n            #set($followersList = [])\n            #foreach ( $follower in $context.arguments.followers )\n              #set( $element =\n              ${followersList.add(\n              {\n                \"S\" : $follower\n              })}\n              )\n            #end\n        \t\":name\" : { \"S\" : \"${context.arguments.name}\" },\n            \":location\" : { \"S\" : \"${context.arguments.location}\" },\n        \t\":description\" : { \"S\" : \"${context.arguments.description}\" },\n            \":followers_count\" : { \"N\" : ${context.arguments.followers_count} },\n            \":friends_count\" : { \"N\" : ${context.arguments.friends_count} },\n            \":favourites_count\" : { \"N\" : ${context.arguments.favourites_count} },\n            \":followers\" : { \"L\" : $utils.toJson($followersList) }\n        }\n    }\n}",
+              "ResponseMappingTemplate": "$utils.toJson($context.result)",
+              "Kind": "UNIT",
+              "DataSourceName": {
+                "Fn::GetAtt": [
+                  "GraphQlDsUsers",
+                  "Name"
+                ]
+              }
             }
           }
         },
@@ -208,18 +815,46 @@
           "ServerlessDeploymentBucketName": {
             "Value": {
               "Ref": "ServerlessDeploymentBucket"
-            },
-            "Export": {
-              "Name": "sls-myappsyncstudy-dev-ServerlessDeploymentBucketName"
             }
           },
-          "HelloLambdaFunctionQualifiedArn": {
+          "GraphqlLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "HelloLambdaVersiontdOv38NqF734CPJ2BAdKX6aMp2S7nxbfMlBPoFOu48"
+              "Ref": "GraphqlLambdaVersion0o4BZb1cv8B3reYyJiTKgrsfYlDtoiZVTu4rmtD84Jg"
+            }
+          },
+          "GraphQlApiKeyDefault": {
+            "Value": {
+              "Fn::GetAtt": [
+                "GraphQlApiKeyDefault",
+                "ApiKey"
+              ]
+            }
+          },
+          "GraphQlApiId": {
+            "Value": {
+              "Fn::GetAtt": [
+                "GraphQlApi",
+                "ApiId"
+              ]
             },
             "Export": {
-              "Name": "sls-myappsyncstudy-dev-HelloLambdaFunctionQualifiedArn"
+              "Name": {
+                "Fn::Sub": "${AWS::StackName}-GraphQlApiId"
+              }
+            }
+          },
+          "GraphQlApiUrl": {
+            "Value": {
+              "Fn::GetAtt": [
+                "GraphQlApi",
+                "GraphQLUrl"
+              ]
+            },
+            "Export": {
+              "Name": {
+                "Fn::Sub": "${AWS::StackName}-GraphQlApiUrl"
+              }
             }
           }
         }
@@ -270,21 +905,6 @@
                             "/*"
                           ]
                         ]
-                      },
-                      {
-                        "Fn::Join": [
-                          "",
-                          [
-                            "arn:",
-                            {
-                              "Ref": "AWS::Partition"
-                            },
-                            ":s3:::",
-                            {
-                              "Ref": "ServerlessDeploymentBucket"
-                            }
-                          ]
-                        ]
                       }
                     ],
                     "Condition": {
@@ -308,40 +928,411 @@
       },
       "vpc": {}
     },
+    "custom": {
+      "accountId": "abc",
+      "appSync": {
+        "authenticationType": "API_KEY",
+        "serviceRole": "AllAccess",
+        "mappingTemplates": [
+          {
+            "dataSource": "Users",
+            "type": "Query",
+            "field": "getUserInfo",
+            "request": "getUserInfo-request-mapping-template.vtl",
+            "response": "getUserInfo-response-mapping-template.vtl"
+          },
+          {
+            "dataSource": "Lambda_MeInfo",
+            "type": "Query",
+            "field": "meInfo",
+            "request": "meInfo-request-mapping-template.vtl",
+            "response": "meInfo-response-mapping-template.vtl"
+          },
+          {
+            "dataSource": "Tweets",
+            "type": "User",
+            "field": "topTweet",
+            "request": "topTweet-request-mapping-template.vtl",
+            "response": "topTweet-response-mapping-template.vtl"
+          },
+          {
+            "dataSource": "Tweets",
+            "type": "User",
+            "field": "tweets",
+            "request": "tweets-request-mapping-template.vtl",
+            "response": "tweets-response-mapping-template.vtl"
+          },
+          {
+            "dataSource": "Tweets",
+            "type": "Mutation",
+            "field": "createTweet",
+            "request": "createTweet-request-mapping-template.vtl",
+            "response": "createTweet-response-mapping-template.vtl"
+          },
+          {
+            "dataSource": "Tweets",
+            "type": "Mutation",
+            "field": "deleteTweet",
+            "request": "deleteTweet-request-mapping-template.vtl",
+            "response": "deleteTweet-response-mapping-template.vtl"
+          },
+          {
+            "dataSource": "Tweets",
+            "type": "Mutation",
+            "field": "reTweet",
+            "request": "reTweet-request-mapping-template.vtl",
+            "response": "reTweet-response-mapping-template.vtl"
+          },
+          {
+            "dataSource": "Tweets",
+            "type": "Mutation",
+            "field": "updateTweet",
+            "request": "updateTweet-request-mapping-template.vtl",
+            "response": "updateTweet-response-mapping-template.vtl"
+          },
+          {
+            "dataSource": "Users",
+            "type": "Mutation",
+            "field": "updateUserInfo",
+            "request": "updateUserInfo-request-mapping-template.vtl",
+            "response": "updateUserInfo-response-mapping-template.vtl"
+          }
+        ],
+        "dataSources": [
+          {
+            "type": "AMAZON_DYNAMODB",
+            "name": "Users",
+            "description": "Users table",
+            "config": {
+              "tableName": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsUsers\"][\"Properties\"][\"DynamoDBConfig\"][\"TableName\"]"
+              },
+              "serviceRoleArn": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsUsers\"][\"Properties\"][\"ServiceRoleArn\"]"
+              }
+            }
+          },
+          {
+            "type": "AMAZON_DYNAMODB",
+            "name": "Tweets",
+            "description": "Tweets table",
+            "config": {
+              "tableName": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsTweets\"][\"Properties\"][\"DynamoDBConfig\"][\"TableName\"]"
+              },
+              "serviceRoleArn": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsTweets\"][\"Properties\"][\"ServiceRoleArn\"]"
+              }
+            }
+          },
+          {
+            "type": "AWS_LAMBDA",
+            "name": "Lambda_MeInfo",
+            "description": "Lambda DataSource",
+            "config": {
+              "functionName": "graphql",
+              "lambdaFunctionArn": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphQlDsLambdaMeInfoRole\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][0][\"Resource\"][0]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "plugins": [
+      "serverless-appsync-plugin",
+      "serverless-webpack"
+    ],
     "pluginsData": {},
     "functions": {
-      "hello": {
-        "handler": "handler.hello",
+      "graphql": {
+        "handler": "handler.graphqlHandler",
         "events": [],
-        "name": "myappsyncstudy-dev-hello",
-        "package": {},
+        "name": "myappsyncstudy-dev-graphql",
+        "package": {
+          "artifact": ".serverless\\myappsyncstudy.zip"
+        },
         "memory": 1024,
         "timeout": 6,
         "runtime": "nodejs14.x",
         "vpc": {},
-        "versionLogicalId": "HelloLambdaVersiontdOv38NqF734CPJ2BAdKX6aMp2S7nxbfMlBPoFOu48"
+        "versionLogicalId": "GraphqlLambdaVersion0o4BZb1cv8B3reYyJiTKgrsfYlDtoiZVTu4rmtD84Jg"
       }
+    },
+    "resources": {
+      "Resources": {
+        "UserTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "KeySchema": [
+              {
+                "AttributeName": "handle",
+                "KeyType": "HASH"
+              }
+            ],
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "handle",
+                "AttributeType": "S"
+              }
+            ],
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": 1,
+              "WriteCapacityUnits": 1
+            },
+            "TableName": "Users"
+          }
+        },
+        "TweetsTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "KeySchema": [
+              {
+                "AttributeName": "tweet_id",
+                "KeyType": "HASH"
+              }
+            ],
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "tweet_id",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "handle",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "retweet_count",
+                "AttributeType": "N"
+              },
+              {
+                "AttributeName": "created_at",
+                "AttributeType": "S"
+              }
+            ],
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": 1,
+              "WriteCapacityUnits": 1
+            },
+            "TableName": "Tweets",
+            "GlobalSecondaryIndexes": [
+              {
+                "IndexName": "top-index",
+                "KeySchema": [
+                  {
+                    "AttributeName": "handle",
+                    "KeyType": "HASH"
+                  },
+                  {
+                    "AttributeName": "retweet_count",
+                    "KeyType": "RANGE"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                },
+                "ProvisionedThroughput": {
+                  "ReadCapacityUnits": 1,
+                  "WriteCapacityUnits": 1
+                }
+              },
+              {
+                "IndexName": "tweet-index",
+                "KeySchema": [
+                  {
+                    "AttributeName": "handle",
+                    "KeyType": "HASH"
+                  },
+                  {
+                    "AttributeName": "created_at",
+                    "KeyType": "RANGE"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                },
+                "ProvisionedThroughput": {
+                  "ReadCapacityUnits": 1,
+                  "WriteCapacityUnits": 1
+                }
+              }
+            ]
+          }
+        },
+        "AppSyncDynamoDBServiceRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "RoleName": "Dynamo-AllAccess",
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": [
+                      "appsync.amazonaws.com"
+                    ]
+                  },
+                  "Action": [
+                    "sts:AssumeRole"
+                  ]
+                }
+              ]
+            },
+            "Policies": [
+              {
+                "PolicyName": "Dynamo-AllAccess-Policy",
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "dynamodb:Query",
+                        "dynamodb:BatchWriteItem",
+                        "dynamodb:GetItem",
+                        "dynamodb:DeleteItem",
+                        "dynamodb:PutItem",
+                        "dynamodb:Scan",
+                        "dynamodb:UpdateItem"
+                      ],
+                      "Resource": [
+                        "arn:aws:dynamodb:us-east-1:abc:table/Users",
+                        "arn:aws:dynamodb:us-east-1:abc:table/Users/*",
+                        "arn:aws:dynamodb:us-east-1:abc:table/Tweets",
+                        "arn:aws:dynamodb:us-east-1:abc:table/Tweets/*"
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "AppSyncLambdaServiceRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "RoleName": "Lambda-AllAccess",
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": [
+                      "appsync.amazonaws.com"
+                    ]
+                  },
+                  "Action": [
+                    "sts:AssumeRole"
+                  ]
+                }
+              ]
+            },
+            "Policies": [
+              {
+                "PolicyName": "Lambda-AllAccess-Policy",
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "lambda:invokeFunction"
+                      ],
+                      "Resource": [
+                        "arn:aws:lambda:us-east-1:abc:function:appsync-example-dev-graphql",
+                        "arn:aws:lambda:us-east-1:abc:function:appsync-example-dev-graphql:*"
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "AppSyncESServiceRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "RoleName": "ElasticSearch-AllAccess",
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": [
+                      "appsync.amazonaws.com"
+                    ]
+                  },
+                  "Action": [
+                    "sts:AssumeRole"
+                  ]
+                }
+              ]
+            },
+            "Policies": [
+              {
+                "PolicyName": "ElasticSearch-AllAccess-Policy",
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "es:*"
+                      ],
+                      "Resource": [
+                        "arn:aws:es:us-east-1:abc:domain/appsync/*"
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "Outputs": {}
     },
     "configValidationMode": "warn",
     "serviceFilename": "serverless.yml",
     "layers": {},
     "initialServerlessConfig": {
-      "service": {
-        "$ref": "$[\"service\"][\"serviceObject\"]"
-      },
+      "service": "myappsyncstudy",
       "frameworkVersion": "2",
+      "plugins": {
+        "$ref": "$[\"service\"][\"plugins\"]"
+      },
       "provider": {
-        "$ref": "$[\"service\"][\"provider\"]"
+        "name": "aws",
+        "runtime": "nodejs14.x",
+        "lambdaHashingVersion": 20201221,
+        "stackName": "appsyncstudy",
+        "apiName": "appsyncstudy",
+        "stage": "dev",
+        "region": "ap-southeast-2",
+        "apiGateway": {
+          "metrics": true
+        },
+        "environment": {
+          "REGION": "ap-southeast-2"
+        }
       },
       "functions": {
         "$ref": "$[\"service\"][\"functions\"]"
+      },
+      "custom": {
+        "$ref": "$[\"service\"][\"custom\"]"
+      },
+      "resources": {
+        "$ref": "$[\"service\"][\"resources\"]"
       }
     },
-    "isDashboardMonitoringPreconfigured": false,
-    "artifact": "C:\\Users\\msava\\work\\appsync_study\\backend\\myappsyncstudy\\.serverless\\myappsyncstudy.zip"
+    "isDashboardMonitoringPreconfigured": false
   },
   "package": {
-    "artifactDirectoryName": "serverless/myappsyncstudy/dev/1620035407279-2021-05-03T09:50:07.279Z",
-    "artifact": "myappsyncstudy.zip"
+    "artifactDirectoryName": "serverless/myappsyncstudy/dev/1620044858563-2021-05-03T12:27:38.563Z",
+    "artifact": ""
   }
 }
