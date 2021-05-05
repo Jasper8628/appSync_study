@@ -1,6 +1,11 @@
 type Mutation {
 	# Create a tweet for a user
 	# consumer keys and tokens are not required for dynamo integration
+	createUser(
+		name:String!,
+		location:String!,
+		handle:String!,
+	):User!
 	createTweet(
 		tweet: String!,
 		consumer_key: String,

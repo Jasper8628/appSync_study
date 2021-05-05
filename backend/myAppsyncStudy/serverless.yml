@@ -107,6 +107,11 @@ custom:
         request: "getTweet-request-mapping-template.vtl"
         response: "getTweet-response-mapping-template.vtl"
       - dataSource: Lambda_MeInfo
+        type: Mutation
+        field: createUser
+        request: "createUser-request-mapping-template.vtl"
+        response: "createUser-response-mapping-template.vtl"
+      - dataSource: Lambda_MeInfo
         type: Query
         field: meInfo
         request: "meInfo-request-mapping-template.vtl"
