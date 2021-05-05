@@ -64,9 +64,11 @@ type Subscription {
 		@aws_subscribe(mutations: ["createTweet"])
 }
 
+
 type Tweet {
 	tweet_id: String!
 	tweet: String!
+	roomId:String!
 	retweeted: Boolean
 	retweet_count: Int
 	favorited: Boolean

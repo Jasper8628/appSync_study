@@ -133,6 +133,16 @@
                       "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/myappsyncstudy-dev*:*:*"
                     }
                   ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "cognito-idp:AdminInitiateAuth",
+                    "dynamodb:*",
+                    "S3:*",
+                    "cognito-idp:AdminCreateUser"
+                  ],
+                  "Resource": "*"
                 }
               ]
             }
@@ -161,7 +171,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/myappsyncstudy/dev/1620118535849-2021-05-04T08:55:35.849Z/myappsyncstudy.zip"
+          "S3Key": "serverless/myappsyncstudy/dev/1620196328843-2021-05-05T06:32:08.843Z/myappsyncstudy.zip"
         },
         "Handler": "handler.graphqlHandler",
         "Runtime": "nodejs14.x",
@@ -170,7 +180,8 @@
         "Timeout": 6,
         "Environment": {
           "Variables": {
-            "REGION": "ap-southeast-2"
+            "REGION": "ap-southeast-2",
+            "END_POINT": "http://localhost:8000"
           }
         },
         "Role": {
@@ -184,14 +195,14 @@
         "GraphqlLogGroup"
       ]
     },
-    "GraphqlLambdaVersionB25ODkzsAOZCnmy4hA8ODzwYCIguJJaWHJxscVLelE": {
+    "GraphqlLambdaVersionABbejULxJ6oNdAXe40JGuVoAZIQuYeu1WOEj1apug": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GraphqlLambdaFunction"
         },
-        "CodeSha256": "FjVl34rJIoZ8NNUFCzAx4dHjEORbT+yiT//3hUYmrPw="
+        "CodeSha256": "TC8V7ilR0iebQ42FRY640WfkGFRE9Fy2ERcFkbey2k4="
       }
     },
     "UserTable": {
@@ -444,13 +455,13 @@
           ]
         },
         "Description": "Auto-generated api key",
-        "Expires": 1651651200
+        "Expires": 1651730400
       }
     },
     "GraphQlSchema": {
       "Type": "AWS::AppSync::GraphQLSchema",
       "Properties": {
-        "Definition": "type Mutation {\n  \n      createTweet(tweet: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String, created_at: String!): Tweet!\n  \n    deleteTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    reTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    updateTweet(tweet_id: String!, tweet: String!): Tweet!\n  \n    updateUserInfo(location: String!, description: String!, name: String!, followers_count: Int!, friends_count: Int!, favourites_count: Int!, followers: [String!]!): User!\n}\n\ntype Query {\n  meInfo(name: String, location: String): User!\n  getUserInfo(handle: String!, consumer_key: String, consumer_secret: String): User!\n  getTweet(tweet: String): Tweet!\n  \n    searchAllTweetsByKeyword(keyword: String!): TweetConnection\n}\n\n\ntype Subscription {\n  addTweet: Tweet @aws_subscribe(mutations: [\"createTweet\"])\n}\n\ntype Tweet {\n  tweet_id: String!\n  tweet: String!\n  retweeted: Boolean\n  retweet_count: Int\n  favorited: Boolean\n  created_at: String!\n}\n\ntype TweetConnection {\n  items: [Tweet!]!\n  nextToken: String\n}\n\ntype User {\n  name: String!\n  handle: String!\n  location: String!\n  description: String!\n  followers_count: Int!\n  friends_count: Int!\n  favourites_count: Int!\n  followers: [String!]!\n  topTweet: Tweet\n  tweets(limit: Int!, nextToken: String): TweetConnection\n  \n    searchTweetsByKeyword(keyword: String!): TweetConnection\n}\n\nschema {\n  query: Query\n  mutation: Mutation\n  subscription: Subscription\n}\n",
+        "Definition": "type Mutation {\n  \n      createUser(name: String!, location: String!, handle: String!): User!\n  createTweet(tweet: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String, created_at: String!): Tweet!\n  \n    deleteTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    reTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    updateTweet(tweet_id: String!, tweet: String!): Tweet!\n  \n    updateUserInfo(location: String!, description: String!, name: String!, followers_count: Int!, friends_count: Int!, favourites_count: Int!, followers: [String!]!): User!\n}\n\ntype Query {\n  meInfo(name: String, location: String): User!\n  getUserInfo(handle: String!, consumer_key: String, consumer_secret: String): User!\n  getTweet(tweet: String): Tweet!\n  \n    searchAllTweetsByKeyword(keyword: String!): TweetConnection\n}\n\n\ntype Subscription {\n  addTweet: Tweet @aws_subscribe(mutations: [\"createTweet\"])\n}\n\ntype Tweet {\n  tweet_id: String!\n  tweet: String!\n  roomId: String!\n  retweeted: Boolean\n  retweet_count: Int\n  favorited: Boolean\n  created_at: String!\n}\n\ntype TweetConnection {\n  items: [Tweet!]!\n  nextToken: String\n}\n\ntype User {\n  name: String!\n  handle: String!\n  location: String!\n  description: String!\n  followers_count: Int!\n  friends_count: Int!\n  favourites_count: Int!\n  followers: [String!]!\n  topTweet: Tweet\n  tweets(limit: Int!, nextToken: String): TweetConnection\n  \n    searchTweetsByKeyword(keyword: String!): TweetConnection\n}\n\nschema {\n  query: Query\n  mutation: Mutation\n  subscription: Subscription\n}\n",
         "ApiId": {
           "Fn::GetAtt": [
             "GraphQlApi",
@@ -858,6 +869,29 @@
         }
       }
     },
+    "GraphQlResolverMutationcreateUser": {
+      "Type": "AWS::AppSync::Resolver",
+      "DependsOn": "GraphQlSchema",
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "GraphQlApi",
+            "ApiId"
+          ]
+        },
+        "TypeName": "Mutation",
+        "FieldName": "createUser",
+        "RequestMappingTemplate": "{\r\n    \"version\": \"2017-02-28\",\r\n    \"operation\": \"Invoke\",\r\n    \"payload\": {\r\n        \"field\": \"createUser\",\r\n        \"arguments\":  $utils.toJson($context.arguments)\r\n    }\r\n}",
+        "ResponseMappingTemplate": "$util.toJson($context.result)",
+        "Kind": "UNIT",
+        "DataSourceName": {
+          "Fn::GetAtt": [
+            "GraphQlDsLambdaMeInfo",
+            "Name"
+          ]
+        }
+      }
+    },
     "GraphQlResolverQuerymeInfo": {
       "Type": "AWS::AppSync::Resolver",
       "DependsOn": "GraphQlSchema",
@@ -939,7 +973,7 @@
         },
         "TypeName": "Mutation",
         "FieldName": "createTweet",
-        "RequestMappingTemplate": "{\r\n    \"version\" : \"2017-02-28\",\r\n    \"operation\" : \"PutItem\",\r\n    \"key\" : {\r\n        \"handle\" : { \"S\" : \"${context.identity.username}\" },\r\n        \"tweet_id\" : { \"S\" : \"$util.autoId()\" }\r\n    },\r\n    \"attributeValues\" : {\r\n        \"tweet\" : { \"S\" : \"${context.arguments.tweet}\" },\r\n        \"retweeted\": { \"BOOL\" : false },\r\n        \"favorited\": { \"BOOL\" : false },\r\n        \"retweet_count\": { \"N\" : 0},\r\n        \"created_at\": {\"S\" : \"${context.arguments.created_at}\" }\r\n    }\r\n}",
+        "RequestMappingTemplate": "{\r\n    \"version\" : \"2017-02-28\",\r\n    \"operation\" : \"PutItem\",\r\n    \"key\" : {\r\n        \"tweet\" : { \"S\" : \"${context.arguments.tweet}\" }\r\n    },\r\n    \"attributeValues\" : {\r\n        \"tweet\" : { \"S\" : \"${context.arguments.tweet}\" },\r\n        \"retweeted\": { \"BOOL\" : false },\r\n        \"favorited\": { \"BOOL\" : false },\r\n        \"retweet_count\": { \"N\" : \"0\"},\r\n        \"created_at\": {\"S\" : \"${context.arguments.created_at}\" },\r\n        \"tweet_id\" : { \"S\" : \"$util.autoId()\" }\r\n    }\r\n}",
         "ResponseMappingTemplate": "$utils.toJson($context.result)",
         "Kind": "UNIT",
         "DataSourceName": {
@@ -1055,7 +1089,7 @@
     "GraphqlLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GraphqlLambdaVersionB25ODkzsAOZCnmy4hA8ODzwYCIguJJaWHJxscVLelE"
+        "Ref": "GraphqlLambdaVersionABbejULxJ6oNdAXe40JGuVoAZIQuYeu1WOEj1apug"
       },
       "Export": {
         "Name": "sls-myappsyncstudy-dev-GraphqlLambdaFunctionQualifiedArn"
