@@ -1,25 +1,21 @@
 const aws = require('aws-sdk');
+
+const dynamoDB = new aws.DynamoDB({
+  region: process.env.REGION,
+  endpoint: process.env.END_POINT
+});
 exports.graphqlHandler = (event, context, callback) => {
+
   console.log('Received event {}', JSON.stringify(event, 3));
-
-  // const consumerKey = event.arguments.consumer_key;
-  // const consumerSecret = event.arguments.consumer_secret;
-
   console.log('Got an Invoke Request.');
+
   switch (event.field) {
     case 'getUserInfo': {
-      // getRawTweets(event.arguments.handle, consumerKey, consumerSecret).then((result) => {
-      //   callback(null, result);
-      // });
-      callback(null, 'this is get user info')
 
+      callback(null, 'this is get user info')
       break;
     }
     case 'createUser': {
-      const dynamoDB = new aws.DynamoDB({
-        region: 'ap-southeast-2',
-        endpoint: "http://localhost:8000"
-      });
       const { name, location, handle } = event.arguments;
       console.log('logging request: ',name);
       const params = {
@@ -36,14 +32,11 @@ exports.graphqlHandler = (event, context, callback) => {
         }
       }
       dynamoDB.putItem(params, (err, data) => {
-        console.log('logging put item')
         if (err) {
           console.log(`${err.statusCode}: ${err.message}`);
           callback(err.message, { name: `couldn't create user ${name}` })
         } else {
-          console.log('logging data: ',data)
-
-          callback(null, { name: name })
+          callback(null, { name: `new user '${name}' created` })
         }
       })
       break;

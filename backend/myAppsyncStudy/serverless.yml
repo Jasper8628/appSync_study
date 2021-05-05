@@ -26,6 +26,7 @@ provider:
 
   environment:
     REGION: ap-southeast-2
+    END_POINT: "http://localhost:8000"
     # COGNITO_USER_POOL_ID: ap-southeast-2_pNT4oXppf
     # COGNITO_USER_POOL_CLIENT_ID: 37t4cmhhsufk0e44hqdivog2cf
 
