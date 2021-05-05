@@ -42,14 +42,14 @@ provider:
     # DEFAULT_PROFILE_IMAGES_AMOUNT: 5
 
   # Permissions
-  # iamRoleStatements:
-  #   - Effect: Allow
-  #     Action:
-  #       - cognito-idp:AdminInitiateAuth
-  #       - dynamodb:*
-  #       - S3:*
-  #       - cognito-idp:AdminCreateUser
-  #     Resource: '*'
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - cognito-idp:AdminInitiateAuth
+        - dynamodb:*
+        - S3:*
+        - cognito-idp:AdminCreateUser
+      Resource: '*'
 
   # # Specify Stomble AWS credentials from ~/.aws/credentials
   # profile: stomble

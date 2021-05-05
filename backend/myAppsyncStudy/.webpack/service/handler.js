@@ -91,12 +91,13 @@ exports.graphqlHandler = (event, context, callback) => {
     case 'createUser':
       {
         const dynamoDB = new aws.DynamoDB({
-          region: 'ap-southeast-2'
+          region: 'ap-southeast-2',
+          endpoint: "http://localhost:8000"
         });
         const { name, location, handle } = event.arguments;
         console.log('logging request: ', name);
         const params = {
-          TableName: 'User',
+          TableName: 'Users',
           Item: {
             name: { S: name },
             handle: { S: handle },
