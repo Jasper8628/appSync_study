@@ -5,13 +5,12 @@
       "name": "myappsyncstudy"
     },
     "provider": {
-      "stage": "dev",
-      "variableSyntax": "\\${([^{}]+?)}",
       "name": "aws",
       "runtime": "nodejs14.x",
-      "lambdaHashingVersion": 20201221,
+      "lambdaHashingVersion": "20201221",
       "stackName": "appsyncstudy",
       "apiName": "appsyncstudy",
+      "stage": "dev",
       "region": "ap-southeast-2",
       "apiGateway": {
         "metrics": true
@@ -19,6 +18,7 @@
       "environment": {
         "REGION": "ap-southeast-2"
       },
+      "variableSyntax": "\\${([^{}:]+?(?:\\(|:)(?:[^:{}][^{}]*?)?)}",
       "versionFunctions": true,
       "compiledCloudFormationTemplate": {
         "AWSTemplateFormatVersion": "2010-09-09",
@@ -64,6 +64,21 @@
                               "Ref": "ServerlessDeploymentBucket"
                             },
                             "/*"
+                          ]
+                        ]
+                      },
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            }
                           ]
                         ]
                       }
@@ -168,30 +183,30 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/myappsyncstudy/dev/1620077991943-2021-05-03T21:39:51.943Z/myappsyncstudy.zip"
+                "S3Key": "serverless/myappsyncstudy/dev/1620118535849-2021-05-04T08:55:35.849Z/myappsyncstudy.zip"
               },
-              "FunctionName": "myappsyncstudy-dev-graphql",
               "Handler": "handler.graphqlHandler",
-              "MemorySize": 1024,
-              "Role": {
-                "Fn::GetAtt": [
-                  "IamRoleLambdaExecution",
-                  "Arn"
-                ]
-              },
               "Runtime": "nodejs14.x",
+              "FunctionName": "myappsyncstudy-dev-graphql",
+              "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
                 "Variables": {
                   "REGION": "ap-southeast-2"
                 }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
               }
             },
             "DependsOn": [
               "GraphqlLogGroup"
             ]
           },
-          "GraphqlLambdaVersionYa3wq8EH4mQlTENWqVUOgx1ohluac1b1Vqiv1DEBU8": {
+          "GraphqlLambdaVersionB25ODkzsAOZCnmy4hA8ODzwYCIguJJaWHJxscVLelE": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
@@ -451,13 +466,13 @@
                 ]
               },
               "Description": "Auto-generated api key",
-              "Expires": 1651611600
+              "Expires": 1651651200
             }
           },
           "GraphQlSchema": {
             "Type": "AWS::AppSync::GraphQLSchema",
             "Properties": {
-              "Definition": "type Mutation {\n  \n      createTweet(tweet: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String, created_at: String!): Tweet!\n  \n    deleteTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    reTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    updateTweet(tweet_id: String!, tweet: String!): Tweet!\n  \n    updateUserInfo(location: String!, description: String!, name: String!, followers_count: Int!, friends_count: Int!, favourites_count: Int!, followers: [String!]!): User!\n}\n\ntype Query {\n  meInfo(name: String, location: String): User!\n  getUserInfo(handle: String!, consumer_key: String, consumer_secret: String): User!\n  getTweet(tweet: String): Tweet!\n  \n    searchAllTweetsByKeyword(keyword: String!): TweetConnection\n}\n\ndirective @aws_subscribe(mutations: [String!]!) on FIELD_DEFINITION\n\ntype Subscription {\n  addTweet: Tweet @aws_subscribe(mutations: [\"createTweet\"])\n}\n\ntype Tweet {\n  tweet_id: String!\n  tweet: String!\n  retweeted: Boolean\n  retweet_count: Int\n  favorited: Boolean\n  created_at: String!\n}\n\ntype TweetConnection {\n  items: [Tweet!]!\n  nextToken: String\n}\n\ntype User {\n  name: String!\n  handle: String!\n  location: String!\n  description: String!\n  followers_count: Int!\n  friends_count: Int!\n  favourites_count: Int!\n  followers: [String!]!\n  topTweet: Tweet\n  tweets(limit: Int!, nextToken: String): TweetConnection\n  \n    searchTweetsByKeyword(keyword: String!): TweetConnection\n}\n\nschema {\n  query: Query\n  mutation: Mutation\n  subscription: Subscription\n}\n",
+              "Definition": "type Mutation {\n  \n      createTweet(tweet: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String, created_at: String!): Tweet!\n  \n    deleteTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    reTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    updateTweet(tweet_id: String!, tweet: String!): Tweet!\n  \n    updateUserInfo(location: String!, description: String!, name: String!, followers_count: Int!, friends_count: Int!, favourites_count: Int!, followers: [String!]!): User!\n}\n\ntype Query {\n  meInfo(name: String, location: String): User!\n  getUserInfo(handle: String!, consumer_key: String, consumer_secret: String): User!\n  getTweet(tweet: String): Tweet!\n  \n    searchAllTweetsByKeyword(keyword: String!): TweetConnection\n}\n\n\ntype Subscription {\n  addTweet: Tweet @aws_subscribe(mutations: [\"createTweet\"])\n}\n\ntype Tweet {\n  tweet_id: String!\n  tweet: String!\n  retweeted: Boolean\n  retweet_count: Int\n  favorited: Boolean\n  created_at: String!\n}\n\ntype TweetConnection {\n  items: [Tweet!]!\n  nextToken: String\n}\n\ntype User {\n  name: String!\n  handle: String!\n  location: String!\n  description: String!\n  followers_count: Int!\n  friends_count: Int!\n  favourites_count: Int!\n  followers: [String!]!\n  topTweet: Tweet\n  tweets(limit: Int!, nextToken: String): TweetConnection\n  \n    searchTweetsByKeyword(keyword: String!): TweetConnection\n}\n\nschema {\n  query: Query\n  mutation: Mutation\n  subscription: Subscription\n}\n",
               "ApiId": {
                 "Fn::GetAtt": [
                   "GraphQlApi",
@@ -784,7 +799,7 @@
               },
               "TypeName": "Query",
               "FieldName": "getUserInfo",
-              "RequestMappingTemplate": "{\n    \"version\" : \"2017-02-28\",\n    \"operation\" : \"Query\",\n    \"query\" : {\n        \"expression\": \"handle = :handle\",\n        \"expressionValues\" : {\n            \":handle\" : {\n                \"S\" : \"${context.arguments.handle}\"\n            }\n        }\n    }\n}",
+              "RequestMappingTemplate": "{\r\n    \"version\" : \"2017-02-28\",\r\n    \"operation\" : \"Query\",\r\n    \"query\" : {\r\n        \"expression\": \"handle = :handle\",\r\n        \"expressionValues\" : {\r\n            \":handle\" : {\r\n                \"S\" : \"${context.arguments.handle}\"\r\n            }\r\n        }\r\n    }\r\n}",
               "ResponseMappingTemplate": "$util.toJson($context.result.items[0])",
               "Kind": "UNIT",
               "DataSourceName": {
@@ -830,7 +845,7 @@
               },
               "TypeName": "Query",
               "FieldName": "meInfo",
-              "RequestMappingTemplate": "{\n    \"version\": \"2017-02-28\",\n    \"operation\": \"Invoke\",\n    \"payload\": {\n        \"field\": \"meInfo\",\n        \"arguments\":  $utils.toJson($context.arguments),\n        \"handle\" : $utils.toJson($context.identity.username)\n    }\n}",
+              "RequestMappingTemplate": "{\r\n    \"version\": \"2017-02-28\",\r\n    \"operation\": \"Invoke\",\r\n    \"payload\": {\r\n        \"field\": \"meInfo\",\r\n        \"arguments\":  $utils.toJson($context.arguments),\r\n        \"handle\" : $utils.toJson($context.identity.username)\r\n    }\r\n}",
               "ResponseMappingTemplate": "$util.toJson($context.result)",
               "Kind": "UNIT",
               "DataSourceName": {
@@ -853,7 +868,7 @@
               },
               "TypeName": "User",
               "FieldName": "topTweet",
-              "RequestMappingTemplate": "{\n    \"version\" : \"2017-02-28\",\n    \"operation\" : \"Query\",\n    \"query\" : {\n        ## Provide a query expression. **\n        \"expression\": \"handle = :handle\",\n        \"expressionValues\" : {\n            \":handle\" : {\n                \"S\" : \"${context.identity.username}\"\n            }\n        }\n    },\n    ## Provide a secondary index name or remove the next line to query the table directly. **\n    \"index\": \"top-index\",\n    ## Add 'limit' and 'nextToken' arguments to this field in your schema to implement pagination. **\n    \"limit\": 1,\n    \"scanIndexForward\": false\n}",
+              "RequestMappingTemplate": "{\r\n    \"version\" : \"2017-02-28\",\r\n    \"operation\" : \"Query\",\r\n    \"query\" : {\r\n        ## Provide a query expression. **\r\n        \"expression\": \"handle = :handle\",\r\n        \"expressionValues\" : {\r\n            \":handle\" : {\r\n                \"S\" : \"${context.identity.username}\"\r\n            }\r\n        }\r\n    },\r\n    ## Provide a secondary index name or remove the next line to query the table directly. **\r\n    \"index\": \"top-index\",\r\n    ## Add 'limit' and 'nextToken' arguments to this field in your schema to implement pagination. **\r\n    \"limit\": 1,\r\n    \"scanIndexForward\": false\r\n}",
               "ResponseMappingTemplate": "$util.toJson($context.result.items[0])",
               "Kind": "UNIT",
               "DataSourceName": {
@@ -876,8 +891,8 @@
               },
               "TypeName": "User",
               "FieldName": "tweets",
-              "RequestMappingTemplate": "{\n    \"version\": \"2017-02-28\",\n    \"operation\": \"Query\",\n    \"query\": {\n        \"expression\": \"handle = :handle\",\n        \"expressionValues\": {\n            \":handle\": {\n                \"S\": \"$context.identity.username\"\n            }\n        }\n    },\n    ## Provide a secondary index name or remove the next line to query the table directly. **\n    \"index\": \"tweet-index\",\n    \"limit\": #if($context.arguments.limit) $context.arguments.limit #else 10 #end,\n    \"nextToken\": #if($context.arguments.nextToken) \"$context.arguments.nextToken\" #else null #end,\n    \"scanIndexForward\": false\n}",
-              "ResponseMappingTemplate": "{\n    \"items\": $util.toJson($context.result.items),\n    \"nextToken\": $util.toJson($context.result.nextToken)\n}",
+              "RequestMappingTemplate": "{\r\n    \"version\": \"2017-02-28\",\r\n    \"operation\": \"Query\",\r\n    \"query\": {\r\n        \"expression\": \"handle = :handle\",\r\n        \"expressionValues\": {\r\n            \":handle\": {\r\n                \"S\": \"$context.identity.username\"\r\n            }\r\n        }\r\n    },\r\n    ## Provide a secondary index name or remove the next line to query the table directly. **\r\n    \"index\": \"tweet-index\",\r\n    \"limit\": #if($context.arguments.limit) $context.arguments.limit #else 10 #end,\r\n    \"nextToken\": #if($context.arguments.nextToken) \"$context.arguments.nextToken\" #else null #end,\r\n    \"scanIndexForward\": false\r\n}",
+              "ResponseMappingTemplate": "{\r\n    \"items\": $util.toJson($context.result.items),\r\n    \"nextToken\": $util.toJson($context.result.nextToken)\r\n}",
               "Kind": "UNIT",
               "DataSourceName": {
                 "Fn::GetAtt": [
@@ -899,7 +914,7 @@
               },
               "TypeName": "Mutation",
               "FieldName": "createTweet",
-              "RequestMappingTemplate": "{\n    \"version\" : \"2017-02-28\",\n    \"operation\" : \"PutItem\",\n    \"key\" : {\n        \"handle\" : { \"S\" : \"${context.identity.username}\" },\n        \"tweet_id\" : { \"S\" : \"$util.autoId()\" }\n    },\n    \"attributeValues\" : {\n        \"tweet\" : { \"S\" : \"${context.arguments.tweet}\" },\n        \"retweeted\": { \"BOOL\" : false },\n        \"favorited\": { \"BOOL\" : false },\n        \"retweet_count\": { \"N\" : 0},\n        \"created_at\": {\"S\" : \"${context.arguments.created_at}\" }\n    }\n}",
+              "RequestMappingTemplate": "{\r\n    \"version\" : \"2017-02-28\",\r\n    \"operation\" : \"PutItem\",\r\n    \"key\" : {\r\n        \"handle\" : { \"S\" : \"${context.identity.username}\" },\r\n        \"tweet_id\" : { \"S\" : \"$util.autoId()\" }\r\n    },\r\n    \"attributeValues\" : {\r\n        \"tweet\" : { \"S\" : \"${context.arguments.tweet}\" },\r\n        \"retweeted\": { \"BOOL\" : false },\r\n        \"favorited\": { \"BOOL\" : false },\r\n        \"retweet_count\": { \"N\" : 0},\r\n        \"created_at\": {\"S\" : \"${context.arguments.created_at}\" }\r\n    }\r\n}",
               "ResponseMappingTemplate": "$utils.toJson($context.result)",
               "Kind": "UNIT",
               "DataSourceName": {
@@ -922,7 +937,7 @@
               },
               "TypeName": "Mutation",
               "FieldName": "deleteTweet",
-              "RequestMappingTemplate": "{\n    \"version\" : \"2017-02-28\",\n    \"operation\" : \"DeleteItem\",\n    \"key\" : {\n        \"tweet_id\" : { \"S\" : \"${context.arguments.tweet_id}\" }\n    }\n}",
+              "RequestMappingTemplate": "{\r\n    \"version\" : \"2017-02-28\",\r\n    \"operation\" : \"DeleteItem\",\r\n    \"key\" : {\r\n        \"tweet_id\" : { \"S\" : \"${context.arguments.tweet_id}\" }\r\n    }\r\n}",
               "ResponseMappingTemplate": "$util.toJson($context.result)",
               "Kind": "UNIT",
               "DataSourceName": {
@@ -945,7 +960,7 @@
               },
               "TypeName": "Mutation",
               "FieldName": "reTweet",
-              "RequestMappingTemplate": "{\n    \"version\" : \"2017-02-28\",\n    \"operation\" : \"UpdateItem\",\n    \"key\" : {\n        \"tweet_id\" : { \"S\" : \"${context.arguments.tweet_id}\" }\n    },\n    \"update\" : {\n        \"expression\" : \"ADD retweet_count :inc\",\n        \"expressionValues\": {\n        \t\":inc\" : { \"N\" : 1 }\n        }\n    }\n}",
+              "RequestMappingTemplate": "{\r\n    \"version\" : \"2017-02-28\",\r\n    \"operation\" : \"UpdateItem\",\r\n    \"key\" : {\r\n        \"tweet_id\" : { \"S\" : \"${context.arguments.tweet_id}\" }\r\n    },\r\n    \"update\" : {\r\n        \"expression\" : \"ADD retweet_count :inc\",\r\n        \"expressionValues\": {\r\n        \t\":inc\" : { \"N\" : 1 }\r\n        }\r\n    }\r\n}",
               "ResponseMappingTemplate": "$utils.toJson($context.result)",
               "Kind": "UNIT",
               "DataSourceName": {
@@ -968,7 +983,7 @@
               },
               "TypeName": "Mutation",
               "FieldName": "updateTweet",
-              "RequestMappingTemplate": "{\n    \"version\" : \"2017-02-28\",\n    \"operation\" : \"UpdateItem\",\n    \"key\" : {\n        \"tweet_id\" : { \"S\" : \"${context.arguments.tweet_id}\" }\n    },\n    \"update\" : {\n        \"expression\" : \"SET tweet = :tweet\",\n        \"expressionValues\": {\n        \t\":tweet\" : { \"S\" : \"${context.arguments.tweet}\" }\n        }\n    }\n}",
+              "RequestMappingTemplate": "{\r\n    \"version\" : \"2017-02-28\",\r\n    \"operation\" : \"UpdateItem\",\r\n    \"key\" : {\r\n        \"tweet_id\" : { \"S\" : \"${context.arguments.tweet_id}\" }\r\n    },\r\n    \"update\" : {\r\n        \"expression\" : \"SET tweet = :tweet\",\r\n        \"expressionValues\": {\r\n        \t\":tweet\" : { \"S\" : \"${context.arguments.tweet}\" }\r\n        }\r\n    }\r\n}",
               "ResponseMappingTemplate": "$utils.toJson($context.result)",
               "Kind": "UNIT",
               "DataSourceName": {
@@ -991,7 +1006,7 @@
               },
               "TypeName": "Mutation",
               "FieldName": "updateUserInfo",
-              "RequestMappingTemplate": "{\n    \"version\" : \"2017-02-28\",\n    \"operation\" : \"UpdateItem\",\n    \"key\" : {\n        \"handle\" : { \"S\" : \"${context.identity.username}\" }\n    },\n    \"update\" : {\n        \"expression\" : \"SET followers = :followers, #name = :name, #location = :location, description = :description, followers_count = :followers_count, friends_count = :friends_count, favourites_count = :favourites_count\",\n        \"expressionNames\": {\n            \"#name\" : \"name\",\n            \"#location\" : \"location\"\n        },\n        \"expressionValues\": {\n            #set($followersList = [])\n            #foreach ( $follower in $context.arguments.followers )\n              #set( $element =\n              ${followersList.add(\n              {\n                \"S\" : $follower\n              })}\n              )\n            #end\n        \t\":name\" : { \"S\" : \"${context.arguments.name}\" },\n            \":location\" : { \"S\" : \"${context.arguments.location}\" },\n        \t\":description\" : { \"S\" : \"${context.arguments.description}\" },\n            \":followers_count\" : { \"N\" : ${context.arguments.followers_count} },\n            \":friends_count\" : { \"N\" : ${context.arguments.friends_count} },\n            \":favourites_count\" : { \"N\" : ${context.arguments.favourites_count} },\n            \":followers\" : { \"L\" : $utils.toJson($followersList) }\n        }\n    }\n}",
+              "RequestMappingTemplate": "{\r\n    \"version\" : \"2017-02-28\",\r\n    \"operation\" : \"UpdateItem\",\r\n    \"key\" : {\r\n        \"handle\" : { \"S\" : \"${context.identity.username}\" }\r\n    },\r\n    \"update\" : {\r\n        \"expression\" : \"SET followers = :followers, #name = :name, #location = :location, description = :description, followers_count = :followers_count, friends_count = :friends_count, favourites_count = :favourites_count\",\r\n        \"expressionNames\": {\r\n            \"#name\" : \"name\",\r\n            \"#location\" : \"location\"\r\n        },\r\n        \"expressionValues\": {\r\n            #set($followersList = [])\r\n            #foreach ( $follower in $context.arguments.followers )\r\n              #set( $element =\r\n              ${followersList.add(\r\n              {\r\n                \"S\" : $follower\r\n              })}\r\n              )\r\n            #end\r\n        \t\":name\" : { \"S\" : \"${context.arguments.name}\" },\r\n            \":location\" : { \"S\" : \"${context.arguments.location}\" },\r\n        \t\":description\" : { \"S\" : \"${context.arguments.description}\" },\r\n            \":followers_count\" : { \"N\" : ${context.arguments.followers_count} },\r\n            \":friends_count\" : { \"N\" : ${context.arguments.friends_count} },\r\n            \":favourites_count\" : { \"N\" : ${context.arguments.favourites_count} },\r\n            \":followers\" : { \"L\" : $utils.toJson($followersList) }\r\n        }\r\n    }\r\n}",
               "ResponseMappingTemplate": "$utils.toJson($context.result)",
               "Kind": "UNIT",
               "DataSourceName": {
@@ -1007,12 +1022,18 @@
           "ServerlessDeploymentBucketName": {
             "Value": {
               "Ref": "ServerlessDeploymentBucket"
+            },
+            "Export": {
+              "Name": "sls-myappsyncstudy-dev-ServerlessDeploymentBucketName"
             }
           },
           "GraphqlLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GraphqlLambdaVersionYa3wq8EH4mQlTENWqVUOgx1ohluac1b1Vqiv1DEBU8"
+              "Ref": "GraphqlLambdaVersionB25ODkzsAOZCnmy4hA8ODzwYCIguJJaWHJxscVLelE"
+            },
+            "Export": {
+              "Name": "sls-myappsyncstudy-dev-GraphqlLambdaFunctionQualifiedArn"
             }
           },
           "GraphQlApiKeyDefault": {
@@ -1095,6 +1116,21 @@
                               "Ref": "ServerlessDeploymentBucket"
                             },
                             "/*"
+                          ]
+                        ]
+                      },
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            }
                           ]
                         ]
                       }
@@ -1246,7 +1282,7 @@
         "timeout": 6,
         "runtime": "nodejs14.x",
         "vpc": {},
-        "versionLogicalId": "GraphqlLambdaVersionYa3wq8EH4mQlTENWqVUOgx1ohluac1b1Vqiv1DEBU8"
+        "versionLogicalId": "GraphqlLambdaVersionB25ODkzsAOZCnmy4hA8ODzwYCIguJJaWHJxscVLelE"
       }
     },
     "resources": {
@@ -1489,25 +1525,15 @@
     "serviceFilename": "serverless.yml",
     "layers": {},
     "initialServerlessConfig": {
-      "service": "myappsyncstudy",
+      "service": {
+        "$ref": "$[\"service\"][\"serviceObject\"]"
+      },
       "frameworkVersion": "2",
       "plugins": {
         "$ref": "$[\"service\"][\"plugins\"]"
       },
       "provider": {
-        "name": "aws",
-        "runtime": "nodejs14.x",
-        "lambdaHashingVersion": 20201221,
-        "stackName": "appsyncstudy",
-        "apiName": "appsyncstudy",
-        "stage": "dev",
-        "region": "ap-southeast-2",
-        "apiGateway": {
-          "metrics": true
-        },
-        "environment": {
-          "REGION": "ap-southeast-2"
-        }
+        "$ref": "$[\"service\"][\"provider\"]"
       },
       "functions": {
         "$ref": "$[\"service\"][\"functions\"]"
@@ -1522,7 +1548,7 @@
     "isDashboardMonitoringPreconfigured": false
   },
   "package": {
-    "artifactDirectoryName": "serverless/myappsyncstudy/dev/1620077991943-2021-05-03T21:39:51.943Z",
+    "artifactDirectoryName": "serverless/myappsyncstudy/dev/1620118535849-2021-05-04T08:55:35.849Z",
     "artifact": ""
   }
 }

@@ -4,6 +4,9 @@ service: myappsyncstudy
 frameworkVersion: '2'
 
 plugins:
+  - serverless-dynamodb-local
+  - serverless-appsync-simulator
+  - serverless-offline
   - serverless-appsync-plugin
   - serverless-webpack
 
@@ -58,7 +61,31 @@ functions:
     handler: handler.graphqlHandler
 
 custom:
+
+  appsync-simulator:
+    apiKey: da2-fakeApiId123456
+    watch: false
+    schema: schema.graphql
+
   accountId: abc
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+      seed: true
+      convertEmptyValues: true
+
+  # serverless-offline:
+  #   httpsProtocol: "dev-certs"
+  #   httpPort: 4000
+  #   stageVariables:
+  #     foo: "bar"
+
   appSync:
     # name:  # defaults to api
     authenticationType: API_KEY
@@ -124,7 +151,7 @@ custom:
         field: updateUserInfo
         request: "updateUserInfo-request-mapping-template.vtl"
         response: "updateUserInfo-response-mapping-template.vtl"
-    # schema: # defaults schema.graphql
+    schema: schema.graphql
     dataSources:
       - type: AMAZON_DYNAMODB
         name: Users
