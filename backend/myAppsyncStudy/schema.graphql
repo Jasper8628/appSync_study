@@ -60,7 +60,7 @@ type Query {
 
 # directive @aws_subscribe(mutations: [String!]!) on FIELD_DEFINITION
 type Subscription {
-	addTweet: Tweet
+	addTweet(created_at:String!): Tweet
 		@aws_subscribe(mutations: ["createTweet"])
 }
 

@@ -1,7 +1,7 @@
 module.exports = {
   tables: [
     {
-      TableName: "table",
+      TableName: "keys",
       KeySchema: [{ AttributeName: "id", KeyType: "HASH" }],
       AttributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
       ProvisionedThroughput: {
@@ -10,8 +10,8 @@ module.exports = {
       },
       data: [
         {
-          id: "a",
-          someattribute: "hello world",
+          id: "50",
+          value: { name: "already exists" },
         },
       ],
     },

@@ -171,7 +171,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/myappsyncstudy/dev/1620196328843-2021-05-05T06:32:08.843Z/myappsyncstudy.zip"
+          "S3Key": "serverless/myappsyncstudy/dev/1620265453189-2021-05-06T01:44:13.189Z/myappsyncstudy.zip"
         },
         "Handler": "handler.graphqlHandler",
         "Runtime": "nodejs14.x",
@@ -455,13 +455,13 @@
           ]
         },
         "Description": "Auto-generated api key",
-        "Expires": 1651730400
+        "Expires": 1651798800
       }
     },
     "GraphQlSchema": {
       "Type": "AWS::AppSync::GraphQLSchema",
       "Properties": {
-        "Definition": "type Mutation {\n  \n      createUser(name: String!, location: String!, handle: String!): User!\n  createTweet(tweet: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String, created_at: String!): Tweet!\n  \n    deleteTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    reTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    updateTweet(tweet_id: String!, tweet: String!): Tweet!\n  \n    updateUserInfo(location: String!, description: String!, name: String!, followers_count: Int!, friends_count: Int!, favourites_count: Int!, followers: [String!]!): User!\n}\n\ntype Query {\n  meInfo(name: String, location: String): User!\n  getUserInfo(handle: String!, consumer_key: String, consumer_secret: String): User!\n  getTweet(tweet: String): Tweet!\n  \n    searchAllTweetsByKeyword(keyword: String!): TweetConnection\n}\n\n\ntype Subscription {\n  addTweet: Tweet @aws_subscribe(mutations: [\"createTweet\"])\n}\n\ntype Tweet {\n  tweet_id: String!\n  tweet: String!\n  roomId: String!\n  retweeted: Boolean\n  retweet_count: Int\n  favorited: Boolean\n  created_at: String!\n}\n\ntype TweetConnection {\n  items: [Tweet!]!\n  nextToken: String\n}\n\ntype User {\n  name: String!\n  handle: String!\n  location: String!\n  description: String!\n  followers_count: Int!\n  friends_count: Int!\n  favourites_count: Int!\n  followers: [String!]!\n  topTweet: Tweet\n  tweets(limit: Int!, nextToken: String): TweetConnection\n  \n    searchTweetsByKeyword(keyword: String!): TweetConnection\n}\n\nschema {\n  query: Query\n  mutation: Mutation\n  subscription: Subscription\n}\n",
+        "Definition": "type Mutation {\n  \n      createUser(name: String!, location: String!, handle: String!): User!\n  createTweet(tweet: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String, created_at: String!): Tweet!\n  \n    deleteTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    reTweet(tweet_id: String!, consumer_key: String, consumer_secret: String, access_token_key: String, access_token_secret: String): Tweet!\n  \n    updateTweet(tweet_id: String!, tweet: String!): Tweet!\n  \n    updateUserInfo(location: String!, description: String!, name: String!, followers_count: Int!, friends_count: Int!, favourites_count: Int!, followers: [String!]!): User!\n}\n\ntype Query {\n  meInfo(name: String, location: String): User!\n  getUserInfo(handle: String!, consumer_key: String, consumer_secret: String): User!\n  getTweet(tweet: String): Tweet!\n  \n    searchAllTweetsByKeyword(keyword: String!): TweetConnection\n}\n\n\ntype Subscription {\n  addTweet(created_at: String!): Tweet @aws_subscribe(mutations: [\"createTweet\"])\n}\n\ntype Tweet {\n  tweet_id: String!\n  tweet: String!\n  roomId: String!\n  retweeted: Boolean\n  retweet_count: Int\n  favorited: Boolean\n  created_at: String!\n}\n\ntype TweetConnection {\n  items: [Tweet!]!\n  nextToken: String\n}\n\ntype User {\n  name: String!\n  handle: String!\n  location: String!\n  description: String!\n  followers_count: Int!\n  friends_count: Int!\n  favourites_count: Int!\n  followers: [String!]!\n  topTweet: Tweet\n  tweets(limit: Int!, nextToken: String): TweetConnection\n  \n    searchTweetsByKeyword(keyword: String!): TweetConnection\n}\n\nschema {\n  query: Query\n  mutation: Mutation\n  subscription: Subscription\n}\n",
         "ApiId": {
           "Fn::GetAtt": [
             "GraphQlApi",
